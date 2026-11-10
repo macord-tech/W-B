@@ -4,15 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Preflight Briefing</title>
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#1F7A3D">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Preflight">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="icon" type="image/png" href="icon-192.png">
-
+<meta name="theme-color" content="#2E333B">
+<meta name="apple-mobile-web-app-title" content="Preflight">
 <style>
   /* Layout: a conditions panel beside an editable altitude table; one column on phones.
      Look: neutral grey instrument panel with a faint blue cast and one muted steel accent. Figures in mono. */
@@ -435,6 +434,7 @@
   .col.fillcol .timesec .pair { flex-wrap: wrap; } .col.fillcol .timesec .pair input { flex: 1 1 72px; min-width: 72px; }
 }
 @media screen { .col.fillcol { display: flex; flex-direction: column; align-self: stretch; } .col.fillcol > .sec[aria-label="Comments"] { flex: 1; display: flex; flex-direction: column; } .col.fillcol > .sec[aria-label="Comments"] .ta.tall { flex: 1; resize: none; } }
+@media screen { #comments { min-height: 300px; } }
   .sec { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; min-width: 0; }
   .bar { margin: 0; padding: 6px 10px; background: var(--muted); color: var(--surface); font-family: var(--f-display); font-weight: 600; font-size: 17px; letter-spacing: .08em; text-transform: uppercase; text-align: center; }
   .bar.dark { background: var(--ink); }
@@ -1512,7 +1512,6 @@ let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTime
 </script>
 <div class="foldline" aria-hidden="true"></div>
 <script>
-// offline support: cache this page so it opens without a connection (GitHub Pages / any https host)
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
   window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
 }
