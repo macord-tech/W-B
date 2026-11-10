@@ -4,12 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Preflight Briefing</title>
-<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1F7A3D">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Preflight Briefing">
+<meta name="apple-mobile-web-app-title" content="Preflight">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+
 <style>
   /* Layout: a conditions panel beside an editable altitude table; one column on phones.
      Look: neutral grey instrument panel with a faint blue cast and one muted steel accent. Figures in mono. */
@@ -208,6 +211,53 @@
 
   .notes { margin: 18px 0 0; padding: 14px 0 0; border-top: 1px solid var(--rule); display: grid; gap: 8px; color: var(--muted); font-size: 15px; max-width: 70ch; list-style: none; }
   .foot { color: var(--muted); font-size: 14px; max-width: 80ch; margin: 0; }
+.wxbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 0 0 10px; } .wxbar .foot { flex: 1; min-width: 160px; } .wxbar .foot.err { color: var(--crit); }
+@media print { .wxbar { display: none !important; }
+  /* page 1 left column: diagram across the top; Procedures, Comm, Emergency, Navigation, Notes down the left; Comments down the right; Time Keeping across the bottom */
+  /* booklet order: sheet side 1 = [back cover: Performance | front cover: airport panel], side 2 = [inside left: W&B | inside right: Weather] */
+  /* used only by the Print Fold Over button (html.foldover) */
+  html:not(.foldover) #page1 { height: 9.8in; align-items: stretch; } /* 7.7in of paper at the .78 print zoom */
+  html.foldover .wrap { display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 12px; row-gap: 0; }
+  html.foldover .wrap > .page { display: contents !important; }
+  html.foldover #page2 > .col:nth-child(2) { grid-column: 1; grid-row: 1; }
+  html.foldover #page1 > .col.fillcol { grid-column: 2; grid-row: 1; height: 9.8in; }
+  html.foldover #page1 > .col:nth-child(2) { grid-column: 1; grid-row: 2; break-before: page; }
+  html.foldover #page2 > .col:nth-child(1) { grid-column: 2; grid-row: 2; break-before: page; }
+  .col.fillcol { display: grid !important; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto auto auto auto 1fr auto; align-content: stretch; }
+  .col.fillcol > .sec[aria-label="Airport"] { grid-column: 1 / -1; grid-row: 1; }
+  .col.fillcol > .sec[aria-label="Procedures"] { grid-column: 1; grid-row: 2; }
+  .col.fillcol .two, .col.fillcol .two > div { display: contents; }
+  .col.fillcol .p-comm { grid-column: 1; grid-row: 3; } .col.fillcol .p-em { grid-column: 1; grid-row: 4; }
+  .col.fillcol .p-nav { grid-column: 1; grid-row: 5; } .col.fillcol .p-notes { grid-column: 1; grid-row: 6; align-self: start; }
+  .col.fillcol > .sec[aria-label="Comments"] { grid-column: 2; grid-row: 2 / 7; display: flex; flex-direction: column; break-inside: auto; }
+  .col.fillcol > .sec[aria-label="Comments"] .ta.tall { flex: 1; min-height: 0; resize: none; border: 0 !important; }
+  .col.fillcol .timesec { grid-column: 1 / -1; grid-row: 7; grid-template-columns: repeat(4, 1fr); }
+  .col.fillcol .timesec .tk-hs { grid-column: 1; grid-row: 2; } .col.fillcol .timesec .tk-tu { grid-column: 2; grid-row: 2; }
+  .col.fillcol .timesec .tk-td { grid-column: 3; grid-row: 2; } .col.fillcol .timesec .tk-he { grid-column: 4; grid-row: 2; }
+  .col.fillcol .timesec .kv { border-right: 1px solid var(--rule); } .col.fillcol .timesec .tk-he { border-right: 0; }
+  .col.fillcol .dia img { max-height: 1.8in; }
+  .phint { display: none !important; }
+  #p_pa, #p_da { display: block; min-height: 28px; } #p_pa:has(.phint), #p_da:has(.phint) { border-bottom: 1px solid #aaa; }
+  /* every print column runs to the bottom margin: NOTAM grows to push Aircraft down; the W&B and crosswind charts grow to fill */
+  #page1 > .col:nth-child(2), #page2 > .col { height: 9.8in; display: flex !important; flex-direction: column; }
+  .p-notam { flex: 1; display: flex; flex-direction: column; } .p-notam .ta.tall { flex: 1; min-height: 0; resize: none; }
+  #page1 > .col:nth-child(2) > .sec, #page2 > .col:nth-child(2) > .sec { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  #page1 > .col:nth-child(2) > .sec > .inner, #page2 > .col:nth-child(2) > .sec > .inner { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  #page1 > .col:nth-child(2) .diagram, #page2 > .col:nth-child(2) .diagram { flex: 1; min-height: 0; display: flex; }
+  #chart, #xwChart { flex: 1; width: 100% !important; height: 100% !important; max-height: none !important; min-height: 0; }
+  html.foldover .foldline { display: block !important; position: fixed; top: 0; bottom: 0; left: 50%; width: 0; border-left: 1px dashed #000; }
+  .timesec .sumline { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 24px; padding: 6px 8px; }
+  .timesec .ts { display: flex; align-items: center; gap: 8px; margin: 0; } .timesec .tl { white-space: nowrap; }
+  .timesec .tv { flex: 1; min-height: 30px; border: 1px solid #999; display: flex; align-items: center; padding: 0 8px; }
+  .timesec .tv:empty::before { content: none; }
+  #n_rwy { appearance: none; -webkit-appearance: none; background-image: none !important; }
+  #n_rwy:has(option:checked[value=""]) { color: transparent; }
+  .timesec { display: grid; grid-template-columns: 1fr 1fr; }
+  .timesec > h2, .timesec > .sumline { grid-column: 1 / -1; }
+  .timesec .tk-hs { grid-column: 1; grid-row: 2; } .timesec .tk-he { grid-column: 1; grid-row: 3; }
+  .timesec .tk-tu { grid-column: 2; grid-row: 2; } .timesec .tk-td { grid-column: 2; grid-row: 3; }
+  .timesec .kv { grid-template-columns: 1fr; gap: 1px; } .timesec .kv label { text-align: left; }
+  .timesec .tk-hs, .timesec .tk-he { border-right: 1px solid var(--rule); } }
 
   .seg button { line-height: 1.15; padding: 6px 8px; }
   table { min-width: 640px; }
@@ -321,6 +371,9 @@
   .verdict.ok { background: var(--accent-bg); color: var(--accent); }
   .verdict.idle { background: var(--field); color: var(--muted); font-size: 20px; }
   .verdict.bad { background: var(--warn-bg); color: var(--crit); border: 2px solid var(--crit); }
+.verdict.catpanel { color: var(--ink); border: 2.5px solid var(--accent); }
+.verdict.catpanel.cat-n { background: var(--env-n); } .verdict.catpanel.cat-u { background: var(--env-u); border-style: dashed; }
+@media print { .verdict.catpanel { color: #000; border-color: #000; } .verdict.catpanel.cat-n { background: #e6e6e6 !important; } .verdict.catpanel.cat-u { background: #f4f4f4 !important; } }
   .readout.four { margin-bottom: 14px; }
   .wbt { min-width: 0; table-layout: fixed; }
   .wbt th:first-child { width: 36%; }
@@ -368,6 +421,7 @@
   .page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
   @media (min-width: 1000px) { .page { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
   .col { display: grid; gap: 14px; min-width: 0; align-content: start; }
+@media screen { .col.fillcol { display: flex; flex-direction: column; align-self: stretch; } .col.fillcol > .sec[aria-label="Comments"] { flex: 1; display: flex; flex-direction: column; } .col.fillcol > .sec[aria-label="Comments"] .ta.tall { flex: 1; resize: none; } }
   .sec { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; min-width: 0; }
   .bar { margin: 0; padding: 6px 10px; background: var(--muted); color: var(--surface); font-family: var(--f-display); font-weight: 600; font-size: 17px; letter-spacing: .08em; text-transform: uppercase; text-align: center; }
   .bar.dark { background: var(--ink); }
@@ -406,7 +460,9 @@
   :root[data-theme="dark"][data-ac="FLCT"] { --accent: #F7B873; --accent-bg: #3A2C1C; }
   .perfbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin: 8px 0 2px; } .grasslbl { display: inline-flex; align-items: center; gap: 6px; font-size: 15px; } .now:disabled { opacity: .45; cursor: not-allowed; }
   .now { flex: none; min-height: 40px; padding: 0 9px; border: 1px solid var(--accent); border-radius: 4px; background: transparent; color: var(--accent); font: inherit; font-weight: 600; font-size: 14px; cursor: pointer; }
-  .sumline { padding: 8px 10px; color: var(--muted); font-size: 15px; } .sumline b { color: var(--ink); font-family: var(--f-data); }
+  .sumline { padding: 8px 10px; color: var(--muted); font-size: 15px; }
+.foldline { display: none; }
+#timeSum .ts { margin-right: 18px; } #timeSum .tl { margin-right: 6px; } @media screen { #timeSum .tv:empty::before { content: '–'; } } .sumline b { color: var(--ink); font-family: var(--f-data); }
   .ta { display: block; width: 100%; height: auto; min-height: 76px; padding: 8px; font-family: var(--f-body); resize: vertical; margin-bottom: 8px; }
   .ta.tall { min-height: 150px; margin: 0; border-radius: 0; border: 0; }
   .sec > .ta.tall { border-top: 0; }
@@ -485,8 +541,6 @@
     .kv, .chkrow, .cellp { padding-top: 3px; padding-bottom: 3px; }
     #xwChart .xwdot { fill: #000; } #xwChart .xwcross, #xwChart .xwvec { stroke: #000; } #xwChart .xwhint-bg, #xwChart .xwhint { display: none; }
   }
-  #offlineOk { background: var(--accent-bg); color: var(--accent); border: 1px solid var(--accent); } #offlineOk::before { background: var(--accent); }
-  @media print { #offlineOk { display: none !important; } }
 </style>
 </head>
 <body>
@@ -495,20 +549,12 @@
   <header>
     <div><h1>Preflight Briefing</h1><div class="eyebrow" id="hdrSub"></div></div>
     <button type="button" class="theme-btn" id="themeBtn" aria-label="Switch between dark and light theme">Light</button>
-    <div style="flex-basis:100%"><span class="pill" id="offlineOk" hidden>Available for offline use</span><span class="pill" id="offlineStatus">Checking offline storage…</span></div>
   </header>
 
   <section class="panel noprint" aria-label="Aircraft and airport">
     <div class="panel-head"><h2>Aircraft</h2><span class="tag" id="acTag"></span></div>
     <div class="seg" id="acSeg" role="group" aria-label="Choose aircraft"></div>
-    <div class="field" id="catField" style="margin:14px 0 0">
-      <span class="lbl">Category</span>
-      <div class="seg" id="catSeg" role="group" aria-label="Choose category">
-        <button type="button" data-cat="normal" aria-pressed="true">Normal</button>
-        <button type="button" data-cat="utility" aria-pressed="false">Utility</button>
-      </div>
-    </div>
-    <div class="field" style="margin:14px 0 0">
+        <div class="field" style="margin:14px 0 0">
       <label class="lbl" for="apSel">Airport</label>
       <select class="numin name-in" id="apSel"></select>
     </div>
@@ -516,7 +562,7 @@
   </section>
 
   <div class="page" id="page1">
-    <div class="col">
+    <div class="col fillcol">
       <section class="sec" aria-label="Airport">
         <h2 class="bar" id="apTitle">Airport</h2>
         <div class="dia" id="diaBox"></div>
@@ -524,25 +570,25 @@
       <section class="sec" aria-label="Procedures"><h2 class="bar">Procedures</h2><ul class="plist" id="procList"></ul></section>
       <div class="two">
         <div>
-          <section class="sec"><h2 class="bar">Communication</h2><table class="rtab"><tbody id="commBody"></tbody></table></section>
-          <section class="sec"><h2 class="bar">Emergency (Comm Failure)</h2><table class="rtab"><tbody id="emBody"></tbody></table></section>
-          <section class="sec"><h2 class="bar">Navigation</h2><table class="rtab"><tbody id="navBody"></tbody></table></section>
+          <section class="sec p-comm"><h2 class="bar">Communication</h2><table class="rtab"><tbody id="commBody"></tbody></table></section>
+          <section class="sec p-em"><h2 class="bar">Emergency (Comm Failure)</h2><table class="rtab"><tbody id="emBody"></tbody></table></section>
+          <section class="sec p-nav"><h2 class="bar">Navigation</h2><table class="rtab"><tbody id="navBody"></tbody></table></section>
         </div>
         <div>
-          <section class="sec"><h2 class="bar">Notes</h2>
+          <section class="sec p-notes"><h2 class="bar">Notes</h2>
             <div class="kv"><label for="n_rwy">Runway</label><select id="n_rwy" data-k="n_rwy"></select></div>
             <div class="kv"><label>Wind ref.</label><span class="seg wref" id="wrefSeg" role="group" aria-label="Wind direction reference"><button type="button" data-ref="M" aria-pressed="true">Magnetic</button><button type="button" data-ref="T" aria-pressed="false">True</button></span><input type="hidden" id="n_wref" data-k="n_wref" value="M"></div>
-            <div class="kv"><label for="n_wd">Winds</label><span class="pair"><input id="n_wd" data-k="n_wd" inputmode="numeric" placeholder="dir °"><span>@</span><input id="n_ws" data-k="n_ws" inputmode="numeric" placeholder="kt"></span></div>
-            <div class="kv"><label for="n_alt">Alt. Setting</label><input id="n_alt" data-k="n_alt" inputmode="decimal" placeholder="29.92"></div>
+            <div class="kv"><label for="n_wd">Winds</label><span class="pair"><input id="n_wd" data-k="n_wd" inputmode="numeric"><span>°</span><span>@</span><input id="n_ws" data-k="n_ws" inputmode="numeric"><span>kt</span></span></div>
+            <div class="kv"><label for="n_alt">Alt. Setting</label><input id="n_alt" data-k="n_alt" inputmode="decimal"></div>
             <div class="kv"><label for="n_sq">Squawk Code</label><input id="n_sq" data-k="n_sq" inputmode="numeric"></div>
             <div class="kv"><label for="n_atis">ATIS Code</label><input id="n_atis" data-k="n_atis" autocapitalize="characters"></div>
             <div class="sumline" id="noteWind"></div>
           </section>
-          <section class="sec"><h2 class="bar">Time Keeping</h2>
-            <div class="kv"><label for="h_start">HOBBS Start</label><input id="h_start" data-k="h_start" inputmode="decimal" placeholder="e.g. 1234.5" autocomplete="off"></div>
-            <div class="kv"><label for="t_up">Time Up</label><span class="pair"><input id="t_up" data-k="t_up" inputmode="numeric" maxlength="5" placeholder="HH:MM" autocomplete="off"><button type="button" class="now" data-now="t_up">Now</button></span></div>
-            <div class="kv"><label for="t_down">Time Down</label><span class="pair"><input id="t_down" data-k="t_down" inputmode="numeric" maxlength="5" placeholder="HH:MM" autocomplete="off"><button type="button" class="now" data-now="t_down">Now</button></span></div>
-            <div class="kv"><label for="h_stop">HOBBS Stop</label><input id="h_stop" data-k="h_stop" inputmode="decimal" placeholder="e.g. 1235.8" autocomplete="off"></div>
+          <section class="sec timesec"><h2 class="bar">Time Keeping</h2>
+            <div class="kv tk-hs"><label for="h_start">HOBBS Start</label><input id="h_start" data-k="h_start" inputmode="decimal" autocomplete="off"></div>
+            <div class="kv tk-tu"><label for="t_up">Time Up</label><span class="pair"><input id="t_up" data-k="t_up" inputmode="numeric" maxlength="5" autocomplete="off"><button type="button" class="now" data-now="t_up">Now</button></span></div>
+            <div class="kv tk-td"><label for="t_down">Time Down</label><span class="pair"><input id="t_down" data-k="t_down" inputmode="numeric" maxlength="5" autocomplete="off"><button type="button" class="now" data-now="t_down">Now</button></span></div>
+            <div class="kv tk-he"><label for="h_stop">HOBBS Stop</label><input id="h_stop" data-k="h_stop" inputmode="decimal" autocomplete="off"></div>
             <div class="sumline" id="timeSum"></div>
           </section>
         </div>
@@ -557,6 +603,7 @@
         <div class="inner">
           <div class="fields noprint" id="fields"></div>
           <details class="noprint"><summary>Empty weight and moment (from the W&amp;B report)</summary><div class="fields" id="emptyFields"></div><p class="foot" id="emptyNote"></p></details>
+          <div class="verdict catpanel" id="utilLine" hidden></div>
           <div class="verdict" id="verdict" role="status"></div>
           <div class="pillrow"><span class="pill lowwarn fuelwarn" hidden>Inform Staff of Fuel Quantity</span><span class="pill lowwarn oilwarn" hidden>Inform Staff of Oil Quantity</span><span class="pill lowwarn airwarn" hidden>Inform Staff of Airtime Shortage</span><span class="pill lowwarn datewarn" hidden>Inform Staff of Service Date</span></div>
           <dl class="readout four" id="summary"></dl>
@@ -575,27 +622,28 @@
       <section class="sec" aria-label="Weather">
         <h2 class="bar">Weather</h2>
         <div class="inner">
+          <div class="wxbar"><button type="button" class="now" id="wxBtn">Get METAR &amp; TAF</button><span class="foot" id="wxMsg" role="status"></span></div>
           <label class="lbl" for="w_gfa1">GFA (Cloud &amp; Weather)</label><textarea class="ta" id="w_gfa1" data-k="w_gfa1"></textarea>
           <label class="lbl" for="w_gfa2">GFA (Turb &amp; Icing)</label><textarea class="ta" id="w_gfa2" data-k="w_gfa2"></textarea>
           <label class="lbl" for="w_taf">TAF</label><textarea class="ta" id="w_taf" data-k="w_taf"></textarea>
           <label class="lbl" for="w_metar">METAR</label><textarea class="ta" id="w_metar" data-k="w_metar"></textarea>
           <p class="foot metarnote" id="metarNote"></p>
           <div class="upper"><span class="lbl">Upper winds and temp</span>
-            <label>3000′<input data-k="w_u3" inputmode="text" placeholder="270/15 −5"></label>
-            <label>6000′<input data-k="w_u6" inputmode="text" placeholder="270/25 −12"></label>
-            <label>9000′<input data-k="w_u9" inputmode="text" placeholder="280/35 −20"></label>
+            <label>3000′<input data-k="w_u3" inputmode="text"></label>
+            <label>6000′<input data-k="w_u6" inputmode="text"></label>
+            <label>9000′<input data-k="w_u9" inputmode="text"></label>
           </div>
         </div>
       </section>
-      <section class="sec"><h2 class="bar">NOTAM</h2><textarea class="ta tall" id="notam" data-k="notam" aria-label="NOTAM"></textarea></section>
+      <section class="sec p-notam"><h2 class="bar">NOTAM</h2><textarea class="ta tall" id="notam" data-k="notam" aria-label="NOTAM"></textarea></section>
       <section class="sec" aria-label="Aircraft checks">
         <h2 class="bar">Aircraft</h2>
         <div class="chkrow"><label><input type="checkbox" class="chk" data-k="c_walk"> Walk around complete?</label></div>
         <div class="chkrow"><label><input type="checkbox" class="chk" data-k="c_fuel"> Fuel on board</label>
-          <span class="inl"><label>L (gal) <input data-k="c_fl" inputmode="decimal" placeholder="gal"></label><label>R (gal) <input data-k="c_fr" inputmode="decimal" placeholder="gal"></label><span class="endur" id="endur"></span></span><span class="pill lowwarn fuelwarn" hidden>Inform Staff of Fuel Quantity</span></div>
-        <div class="chkrow"><label><input type="checkbox" class="chk" data-k="c_oil"> Oil quantity</label><span class="inl"><input data-k="c_oilq" inputmode="decimal" placeholder="qt" aria-label="Oil quantity (quarts)"></span><span class="pill lowwarn oilwarn" id="oilPill" hidden>Inform Staff of Oil Quantity</span></div>
+          <span class="inl"><label>L (gal) <input data-k="c_fl" inputmode="decimal"></label><label>R (gal) <input data-k="c_fr" inputmode="decimal"></label><span class="endur" id="endur"></span></span><span class="pill lowwarn fuelwarn" hidden>Inform Staff of Fuel Quantity</span></div>
+        <div class="chkrow"><label><input type="checkbox" class="chk" data-k="c_oil"> Oil quantity</label><span class="inl"><label>Qty (qt) <input data-k="c_oilq" inputmode="decimal" aria-label="Oil quantity (quarts)"></label></span><span class="pill lowwarn oilwarn" id="oilPill" hidden>Inform Staff of Oil Quantity</span></div>
         <div class="chkrow"><label><input type="checkbox" class="chk" data-k="c_jl"> Journey log</label>
-          <span class="inl"><label>Current TTSN <input data-k="c_ttsn" inputmode="decimal"></label><label>Next due TTSN <input data-k="c_nttsn" inputmode="decimal"></label><label>Next due date <input id="c_ndate_v" readonly inputmode="none" placeholder="Select date" autocomplete="off" aria-haspopup="dialog" aria-controls="cal"><input type="hidden" id="c_ndate" data-k="c_ndate"></label></span><span class="pill lowwarn airwarn" id="airPill" hidden>Inform Staff of Airtime Shortage</span><span class="pill lowwarn datewarn" hidden>Inform Staff of Service Date</span>
+          <span class="inl"><label>Current TTSN <input data-k="c_ttsn" inputmode="decimal"></label><label>Next due TTSN <input data-k="c_nttsn" inputmode="decimal"></label><label>Next due date <input id="c_ndate_v" readonly inputmode="none" autocomplete="off" aria-haspopup="dialog" aria-controls="cal"><input type="hidden" id="c_ndate" data-k="c_ndate"></label></span><span class="pill lowwarn airwarn" id="airPill" hidden>Inform Staff of Airtime Shortage</span><span class="pill lowwarn datewarn" hidden>Inform Staff of Service Date</span>
           <div class="cal" id="cal" role="dialog" aria-label="Choose next due date" hidden></div></div>
         <div class="chkrow"><label><input type="checkbox" class="chk" data-k="c_arowjil"> AROWJIL checked?</label></div>
       </section>
@@ -606,13 +654,13 @@
         <h2 class="bar">Aircraft Performance</h2>
         <div class="cond" id="cond"></div>
         <div class="grid2">
-          <div class="cellp"><label for="p_oat">OAT °C</label><input id="p_oat" data-k="p_oat" inputmode="decimal" placeholder="e.g. 15"></div>
+          <div class="cellp"><label for="p_oat">OAT °C</label><input id="p_oat" data-k="p_oat" inputmode="decimal"></div>
           <div class="cellp"><span class="lbl">Field elevation</span><b id="p_elev"></b></div>
           <div class="cellp"><span class="lbl">Pressure altitude</span><b id="p_pa">–</b></div>
           <div class="cellp"><span class="lbl">Density altitude</span><b id="p_da">–</b></div>
           <div class="cellp"><label for="p_tor">Take-off ground roll</label><input id="p_tor" data-k="p_tor" inputmode="decimal"></div>
           <div class="cellp"><label for="p_to50">Over 50′ obstacle</label><input id="p_to50" data-k="p_to50" inputmode="decimal"></div>
-          <div class="cellp"><label>Proposed power</label><span class="pair"><input data-k="p_rpm" inputmode="numeric" placeholder="RPM" aria-label="RPM"><span>@</span><input data-k="p_ft" inputmode="numeric" placeholder="FT" aria-label="Feet"></span></div>
+          <div class="cellp"><label>Proposed power</label><span class="pair"><input data-k="p_rpm" inputmode="numeric" aria-label="RPM"><span>RPM</span><span>@</span><input data-k="p_ft" inputmode="numeric" aria-label="Feet"><span>ft</span></span></div>
           <div class="cellp"><label for="p_ktas">Proposed KTAS</label><input id="p_ktas" data-k="p_ktas" inputmode="decimal"></div>
           <div class="cellp"><label for="p_ldr">Landing roll</label><input id="p_ldr" data-k="p_ldr" inputmode="decimal"></div>
           <div class="cellp"><label for="p_ld50">Over 50′ obstacle</label><input id="p_ld50" data-k="p_ld50" inputmode="decimal"></div>
@@ -622,8 +670,8 @@
         <div class="inner">
           <p class="lbl" style="margin:0 0 6px">Headwind and crosswind</p>
           <div class="xwread" id="xwRead"></div>
-          <div class="diagram"><svg id="xwChart" viewBox="0 0 400 440" role="img" aria-label="Headwind and crosswind component chart"></svg></div>
-          <p class="foot">Uses the runway and wind entered under Notes. Runway headings are magnetic. If the wind is set to True, 16° is subtracted to convert it to magnetic.</p>
+          <div class="diagram"><svg id="xwChart" viewBox="0 0 400 380" role="img" aria-label="Headwind and crosswind component chart"></svg></div>
+          <p class="foot phint">Uses the runway and wind entered under Notes. Runway headings are magnetic. If the wind is set to True, 16° is subtracted to convert it to magnetic.</p>
         </div>
       </section>
     </div>
@@ -655,6 +703,7 @@
       <button type="button" class="add" id="exportBtn">Export TXT</button>
       <button type="button" class="add" id="emailBtn">Email</button>
       <button type="button" class="add" id="printBtn">Print</button>
+      <button type="button" class="add" id="foldBtn">Print Fold Over</button>
       <span class="foot" id="exportMsg" role="status"></span>
       <textarea class="export-text" id="exportText" hidden readonly aria-label="Report text"></textarea>
     </div>
@@ -757,8 +806,6 @@ function buildAircraft() {
   }));
   const a = cur();
   $('acTag').textContent = a.reg;
-  $('catField').hidden = !a.env.utility;
-  $('catSeg').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.cat === state.cat)));
   $('emptyNote').textContent = 'Defaults are the values on the ' + a.reg + ' W&B report. Change them after a re-weigh; the change is kept on this device only.';
   $('notes').innerHTML = [
     'Station arms, empty weight and moment, weight limits and the CG chart come from the W&B report supplied for ' + a.reg + '.',
@@ -770,7 +817,6 @@ function buildAircraft() {
     a.id === 'GSFB' ? 'Ramp weight may be 16 lb above the 3900 lb takeoff limit only if taxi fuel brings it back before takeoff.' : ''
   ].filter(Boolean).map(t => '<li>' + t + '</li>').join('');
 }
-$('catSeg').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { state.cat = b.dataset.cat; buildAircraft(); update(); }));
 
 // ---------- calculation ----------
 let R = null;
@@ -827,9 +873,19 @@ function calc() {
     add(true, 'Ramp weight is ' + fmt(over, 1) + ' lb above the takeoff chart limit. At least ' + fmt(over / FUEL_LB, 1) + ' gal must be burned in taxi and run-up before takeoff.', true);
   }
   if (a.approxEnv) add(true, 'Envelope for this aircraft was read from the chart. Verify it against the POH.', true);
+  let util = null;
+  if (a.env.utility) {
+    const uw = a.env.utility, up = uw.poly, utop = Math.max.apply(null, up.map(p => p[1])), why = [];
+    [[ramp, 'ramp'], [ldg, 'landing']].forEach(([p, l]) => {
+      if (p.w > uw.max + 1e-9) why.push(l + ' weight ' + fmt(p.w, 1) + ' lb is over ' + fmt(uw.max, 0) + ' lb');
+      else if (!inside(up, p.arm, Math.min(p.w, utop))) why.push(l + ' CG ' + fmt(p.arm, 2) + ' in is outside the utility envelope');
+    });
+    if (a.utilEmpty) { const used = a.st.filter(q => a.utilEmpty.indexOf(q.k) >= 0 && num(v[q.k]) > 0); if (used.length) why.push('load in ' + used.map(q => q.n).join(', ')); }
+    util = { ok: !why.length, why, poh: !a.utilEmpty };
+  }
   zfw.ok = null;
   const noEntry = !a.st.map(q => q.k).concat(['fuel', 'burn']).some(k => String(v[k] == null ? '' : v[k]).trim() !== '');
-  R = { a, rows, zfw, ramp, ldg, poly, checks, bad, lims, top, noEntry };
+  R = { a, rows, zfw, ramp, ldg, poly, checks, bad, lims, top, noEntry, util };
 }
 
 // ---------- display ----------
@@ -840,6 +896,11 @@ function update() {
   const vd = $('verdict');
   vd.className = 'verdict ' + (R.noEntry ? 'idle' : (bad.length ? 'bad' : 'ok'));
   vd.textContent = R.noEntry ? 'Enter the loading to check limits' : (bad.length ? 'OUT OF LIMITS' : (hasCaution ? 'Within limits. See notes below' : 'Within limits'));
+  const ul = $('utilLine');
+  ul.hidden = R.noEntry || bad.length > 0;
+  const isU = !!(R.util && R.util.ok);
+  ul.className = 'verdict catpanel ' + (isU ? 'cat-u' : 'cat-n');
+  ul.textContent = ul.hidden ? '' : (isU ? 'Utility category' : 'Normal category');
   $('summary').innerHTML =
     '<div><dt>Ramp weight</dt><dd>' + fmt(ramp.w, 1) + ' <small>lb</small></dd></div>' +
     '<div><dt>Ramp CG</dt><dd>' + fmt(ramp.arm, 2) + ' <small>in</small></dd></div>' +
@@ -895,7 +956,7 @@ function drawChart() {
     const cx = L + pw / 2, cy = T + ph / 2, len = Math.round(Math.min(ph * 1.414, pw) * 0.82), fs = Math.round(len / 6.4);
     s += '<text class="t-oob" transform="translate(' + cx + ' ' + cy + ') rotate(-45)" text-anchor="middle" dominant-baseline="central" font-size="' + fs + '" textLength="' + len + '" lengthAdjust="spacingAndGlyphs">Out of Limits</text>';
   }
-  s += '<text class="t-cat" x="' + (L + 10) + '" y="' + (T + 20) + '">' + a.reg + (state.cat === 'utility' ? ' · Utility' : (a.env.utility ? ' · Normal' : '')) + '</text>';
+  s += '<text class="t-cat" x="' + (L + 10) + '" y="' + (T + 20) + '">' + a.reg + '</text>';
   $('chart').innerHTML = s;
   $('legend').innerHTML = [[zfw, '1', 'Zero fuel (passengers and bags)'], [ramp, '2', 'Ramp (plus fuel)'], [ldg, '3', 'Landing (ramp minus fuel burn)']].map(q => '<li><span class="pn-key' + (q[0].ok === false && !R.noEntry ? ' out' : '') + '">' + q[1] + '</span><span class="lg-n">' + q[2] + '</span><span class="lg-v">' + fmt(q[0].w, 1) + ' lb · CG ' + fmt(q[0].arm, 2) + ' in</span></li>').join('');
 }
@@ -906,7 +967,7 @@ function buildReport() {
   const pad = (t, n) => String(t).padEnd(n), lp = (t, n) => String(t).padStart(n);
   const L = [];
   L.push('WEIGHT & BALANCE: ' + a.reg + ' ' + a.type + (state.cat === 'utility' ? ' (Utility)' : ''));
-  L.push(new Date().toISOString().slice(0, 10));
+  L.push(localDate());
   L.push('');
   L.push(pad('Station', 24) + lp('Weight lb', 11) + lp('Arm in', 9) + lp('Moment', 13));
   rows.forEach(r => L.push(pad(r.n, 24) + lp(fmt(r.w, 1), 11) + lp(fmt(r.arm, 2), 9) + lp(fmt(r.m, 1), 13)));
@@ -914,10 +975,9 @@ function buildReport() {
   L.push('Ramp: ' + fmt(ramp.w, 1) + ' lb, CG ' + fmt(ramp.arm, 2) + ' in');
   L.push('Landing: ' + fmt(ldg.w, 1) + ' lb, CG ' + fmt(ldg.arm, 2) + ' in');
   L.push('Result: ' + (R.noEntry ? 'No loading entered' : (bad.length ? 'OUT OF LIMITS' : 'Within limits')));
+  if (!R.noEntry && !bad.length) L.push('Category: ' + (R.util && R.util.ok ? 'Utility' : 'Normal'));
   L.push('');
   checks.forEach(c => L.push((c.caution ? 'NOTE: ' : (c.ok ? 'OK: ' : 'FAIL: ')) + c.text));
-  L.push('');
-  L.push('Fuel at ' + FUEL_LB + ' lb per US gal. Planning aid; confirm against the aircraft W&B report and POH.');
   return L.join('\r\n') + '\r\n';
 }
 // ======================= Preflight Briefing =======================
@@ -943,7 +1003,7 @@ P.f = P.f || {};
 let apSel = (APS.find(a => a.id === P.ap) || APS[0]).id;
 if (P.v) AC.forEach(a => { if (P.v[a.id]) Object.assign(state.v[a.id], P.v[a.id]); });
 if (Number.isInteger(P.idx) && AC[P.idx]) state.idx = P.idx;
-if (P.cat === 'utility' && AC[state.idx].env.utility) state.cat = 'utility';
+state.cat = 'normal';   // results are always checked against Normal; Utility is evaluated alongside
 
 const curAp = () => APS.find(a => a.id === apSel) || APS[0];
 const $$ = sel => Array.prototype.slice.call(document.querySelectorAll(sel));
@@ -1056,18 +1116,18 @@ function windComp() {
   return { hw: ws * Math.cos(th), xw: ws * Math.sin(th), ws, md: wd };
 }
 function drawXW(w) {
-  const L = 46, T = 14, B = 40, R = 16, S = 5.2, pw = 60 * S, ph = 70 * S;
+  const M = 50, L = 46, T = 14, B = 40, R = 16, S = 326 / M, pw = M * S, ph = M * S;
   const X = x => L + x * S, Y = y => T + ph - y * S;
   let s = '';
-  for (let i = 0; i <= 60; i += 2) s += '<line class="gl2" x1="' + X(i) + '" y1="' + T + '" x2="' + X(i) + '" y2="' + (T + ph) + '" style="opacity:' + (i % 10 ? .12 : .3) + '"/>';
-  for (let j = 0; j <= 70; j += 2) s += '<line class="gl2" x1="' + L + '" y1="' + Y(j) + '" x2="' + (L + pw) + '" y2="' + Y(j) + '" style="opacity:' + (j % 10 ? .12 : .3) + '"/>';
-  for (let i = 0; i <= 60; i += 10) s += '<text class="t-axis" x="' + X(i) + '" y="' + (T + ph + 16) + '" text-anchor="middle">' + i + '</text>';
-  for (let j = 0; j <= 70; j += 10) s += '<text class="t-axis" x="' + (L - 6) + '" y="' + (Y(j) + 4) + '" text-anchor="end">' + j + '</text>';
-  for (let r = 10; r <= 60; r += 10) { s += '<path class="arc" d="M' + X(0) + ' ' + Y(r) + ' A' + r * S + ' ' + r * S + ' 0 0 1 ' + X(r) + ' ' + Y(0) + '"/>'; s += '<text class="t-axis" x="' + (X(r * Math.sin(.78)) + 3) + '" y="' + (Y(r * Math.cos(.78)) - 3) + '">' + r + '</text>'; }
-  for (let a = 10; a <= 90; a += 10) { const rr = 60, x = rr * Math.sin(a * Math.PI / 180), y = rr * Math.cos(a * Math.PI / 180); s += '<line class="ray" x1="' + X(0) + '" y1="' + Y(0) + '" x2="' + X(x) + '" y2="' + Y(y) + '"/><text class="t-axis" x="' + (X(x) + 2) + '" y="' + (Y(y) - 2) + '">' + a + '°</text>'; }
+  for (let i = 0; i <= M; i += 2) s += '<line class="gl2" x1="' + X(i) + '" y1="' + T + '" x2="' + X(i) + '" y2="' + (T + ph) + '" style="opacity:' + (i % 10 ? .12 : .3) + '"/>';
+  for (let j = 0; j <= M; j += 2) s += '<line class="gl2" x1="' + L + '" y1="' + Y(j) + '" x2="' + (L + pw) + '" y2="' + Y(j) + '" style="opacity:' + (j % 10 ? .12 : .3) + '"/>';
+  for (let i = 0; i <= M; i += 10) s += '<text class="t-axis" x="' + X(i) + '" y="' + (T + ph + 16) + '" text-anchor="middle">' + i + '</text>';
+  for (let j = 0; j <= M; j += 10) s += '<text class="t-axis" x="' + (L - 6) + '" y="' + (Y(j) + 4) + '" text-anchor="end">' + j + '</text>';
+  for (let r = 10; r <= M; r += 10) { s += '<path class="arc" d="M' + X(0) + ' ' + Y(r) + ' A' + r * S + ' ' + r * S + ' 0 0 1 ' + X(r) + ' ' + Y(0) + '"/>'; }
+  for (let a = 10; a <= 90; a += 10) { const rr = M, x = rr * Math.sin(a * Math.PI / 180), y = rr * Math.cos(a * Math.PI / 180); s += '<line class="ray" x1="' + X(0) + '" y1="' + Y(0) + '" x2="' + X(x) + '" y2="' + Y(y) + '"/><text class="t-axis" x="' + (X(x) + 2) + '" y="' + (Y(y) - 2) + '">' + a + '°</text>'; }
   s += '<text class="t-axis" x="' + (L + pw / 2) + '" y="' + (T + ph + 34) + '" text-anchor="middle">Crosswind component, kt</text><text class="t-axis" transform="translate(12 ' + (T + ph / 2) + ') rotate(-90)" text-anchor="middle">Headwind component, kt</text>';
   if (w) {
-    const x = Math.min(Math.abs(w.xw), 60), y = Math.max(0, Math.min(w.hw, 70)), bad = w.hw < 0;
+    const x = Math.min(Math.abs(w.xw), M), y = Math.max(0, Math.min(w.hw, M)), bad = w.hw < 0;
     s += '<line class="xwcross" x1="' + X(x) + '" y1="' + Y(y) + '" x2="' + X(x) + '" y2="' + Y(0) + '"/><line class="xwcross" x1="' + X(x) + '" y1="' + Y(y) + '" x2="' + X(0) + '" y2="' + Y(y) + '"/>';
     s += '<line class="xwvec' + (bad ? ' out' : '') + '" x1="' + X(0) + '" y1="' + Y(0) + '" x2="' + X(x) + '" y2="' + Y(y) + '"/>';
     s += '<circle class="xwdot' + (bad ? ' out' : '') + '" cx="' + X(x) + '" cy="' + Y(y) + '" r="10"/>';
@@ -1191,16 +1251,17 @@ function extras() {
   const ap = curAp(), a = cur();
   syncWref();
   // time
-  $('timeSum').innerHTML = 'Air time <b>' + hm(span(val('t_up'), val('t_down'))) + '</b> · Flight time <b>' + hobbsFlt() + '</b>';
+  const airT = hm(span(val('t_up'), val('t_down'))), fltT = hobbsFlt();
+  $('timeSum').innerHTML = '<span class="ts"><span class="tl">Air time</span><b class="tv">' + (airT === '–' ? '' : airT) + '</b></span><span class="ts"><span class="tl">Flight time</span><b class="tv">' + (fltT === '–' ? '' : fltT) + '</b></span>';
   // PA / DA
   const alt = altSetting(), oat = parseFloat(val('p_oat'));
   const pa = isFinite(alt) ? ap.elev + (29.92 - alt) * 1000 : NaN;
   const da = (isFinite(pa) && isFinite(oat)) ? pa + 120 * (oat - (15 - 1.98 * pa / 1000)) : NaN;
   
-  $('p_da').textContent = isFinite(da) ? fmt(Math.round(da), 0) + ' ft' : '– (needs altimeter in Notes and OAT)';
+  $('p_da').innerHTML = isFinite(da) ? fmt(Math.round(da), 0) + ' ft' : '<span class="phint">– (needs altimeter in Notes and OAT)</span>';
   // wind
   const w = windComp();
-  $('xwRead').innerHTML = w ? ('<span>' + (w.hw >= 0 ? 'Headwind' : '<b class="bad">Tailwind</b>') + ' <b>' + fmt(Math.abs(w.hw), 0) + ' kt</b></span><span>Crosswind <b>' + fmt(Math.abs(w.xw), 0) + ' kt</b> from the ' + (w.xw >= 0 ? 'right' : 'left') + '</span>') : '<span class="foot">Pick a runway and enter the wind under Notes.</span>';
+  $('xwRead').innerHTML = w ? ('<span>' + (w.hw >= 0 ? 'Headwind' : '<b class="bad">Tailwind</b>') + ' <b>' + fmt(Math.abs(w.hw), 0) + ' kt</b></span><span>Crosswind <b>' + fmt(Math.abs(w.xw), 0) + ' kt</b> from the ' + (w.xw >= 0 ? 'right' : 'left') + '</span>') : '<span class="foot phint">Pick a runway and enter the wind under Notes.</span>';
   drawXW(w);
   // conditions from Notes, shown in Performance and under Notes
   const rsel = $('n_rwy'), rtxt = rsel.value ? rsel.options[rsel.selectedIndex].text : '';
@@ -1209,7 +1270,7 @@ function extras() {
   const chip = (k, v) => '<span class="chip"><i>' + k + '</i><b>' + (v ? esc(v) : '–') + '</b></span>';
   $('cond').innerHTML = chip('Runway', rtxt) + chip('Wind', wtxt) + chip('Altimeter', atxt) + (w ? chip(w.hw >= 0 ? 'Headwind' : 'Tailwind', fmt(Math.abs(w.hw), 0) + ' kt') + chip('Crosswind', fmt(Math.abs(w.xw), 0) + ' kt ' + (w.xw >= 0 ? 'R' : 'L')) : '');
   $('noteWind').innerHTML = w ? (w.hw >= 0 ? 'Headwind' : '<b class="bad">Tailwind</b>') + ' <b>' + fmt(Math.abs(w.hw), 0) + '</b> kt · Crosswind <b>' + fmt(Math.abs(w.xw), 0) + '</b> kt ' + (w.xw >= 0 ? 'right' : 'left') + (isFinite(pa) ? ' · PA <b>' + fmt(Math.round(pa), 0) + '</b> ft' : '') : '';
-  $('p_pa').textContent = isFinite(pa) ? fmt(Math.round(pa), 0) + ' ft' : '– (enter altimeter under Notes)';
+  $('p_pa').innerHTML = isFinite(pa) ? fmt(Math.round(pa), 0) + ' ft' : '<span class="phint">– (enter altimeter under Notes)</span>';
   // low fuel reminder: total fuel on board under 20 gal
   const ff = $('f_fuel'), low = !!ff && String(ff.value).trim() !== '' && num(ff.value) < 20;
   $$('.fuelwarn').forEach(el => { el.hidden = !low; });
@@ -1285,6 +1346,31 @@ $('cal').addEventListener('click', e => {
 $('cal').addEventListener('change', e => { const k = e.target.dataset.cal; if (k === 'm') calM = +e.target.value; else if (k === 'y') calY = +e.target.value; else return; renderCal(); });
 document.addEventListener('click', e => { if (!$('cal').hidden && e.composedPath().indexOf($('cal')) < 0 && e.target !== $('c_ndate_v')) closeCal(); });
 
+// ---------- live METAR/TAF from aviationweather.gov (needs internet; blocked inside the claude.ai page) ----------
+async function getWx(kind, id) {
+  const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 10000);
+  try {
+    const r = await fetch('https://aviationweather.gov/api/data/' + kind + '?ids=' + encodeURIComponent(id) + '&format=raw', { signal: ctl.signal, cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return (await r.text()).trim();
+  } finally { clearTimeout(tm); }
+}
+$('wxBtn').addEventListener('click', async () => {
+  const btn = $('wxBtn'), msg = $('wxMsg'), id = String(curAp().ident || '').trim().toUpperCase();
+  msg.classList.remove('err');
+  if (!/^[A-Z0-9]{4}$/.test(id)) { msg.classList.add('err'); msg.textContent = 'Pick an airport with a 4-letter identifier first.'; return; }
+  if (navigator.onLine === false) { msg.classList.add('err'); msg.textContent = 'No internet connection. Enter the weather by hand.'; return; }
+  btn.disabled = true; msg.textContent = 'Getting weather for ' + id + '…';
+  const [m, t] = await Promise.allSettled([getWx('metar', id), getWx('taf', id)]);
+  btn.disabled = false;
+  const got = [], miss = [];
+  if (m.status === 'fulfilled' && m.value) { const el = $('w_metar'); el.value = m.value.split(/\r?\n/)[0].trim(); el.dispatchEvent(new Event('input', { bubbles: true })); got.push('METAR'); } else miss.push('METAR');
+  if (t.status === 'fulfilled' && t.value) { const el = $('w_taf'); el.value = t.value; el.dispatchEvent(new Event('input', { bubbles: true })); got.push('TAF'); } else miss.push('TAF');
+  const z = new Date(), hhmm = String(z.getUTCHours()).padStart(2, '0') + String(z.getUTCMinutes()).padStart(2, '0') + 'Z';
+  if (!got.length) { msg.classList.add('err'); msg.textContent = 'Could not get weather for ' + id + '. The service may be unreachable from here. Enter it by hand.'; return; }
+  msg.textContent = got.join(' and ') + ' for ' + id + ' retrieved ' + hhmm + ' from aviationweather.gov' + (miss.length ? ' (no ' + miss.join(' or ') + ' found)' : '') + '. Confirm against NAV CANADA before flight.';
+});
+
 // ---------- METAR paste: fill winds, altimeter and temperature ----------
 function parseMetar(txt) {
   const out = {}, toks = String(txt || '').toUpperCase().split(/\s+/).filter(Boolean);
@@ -1333,39 +1419,39 @@ armConfirm($('newBtn'), 'New briefing', () => {
 });
 
 // ---------- report ----------
+function localDate() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 function buildBrief() {
-  const ap = curAp(), a = cur(), L = [], f = id => (val(id) || '').trim();
+  const ap = curAp(), a = cur(), L = [], f = id => (val(id) || '').trim(), D = v => { v = String(v == null ? '' : v).trim(); return v && v !== '–' ? v : '—'; }, g = id => D(f(id));
   const sec = t => { L.push(''); L.push(t.toUpperCase()); };
   L.push('PREFLIGHT BRIEFING: ' + a.reg + ' ' + a.type + ' · ' + ap.ident + (ap.name ? ' ' + ap.name : ''));
-  L.push(new Date().toISOString().slice(0, 10));
-  sec('Procedures'); ap.procedures.forEach(t => L.push('- ' + t));
-  sec('Communication'); ap.comm.forEach(r => L.push(r[0] + ': ' + r[1]));
-  if (ap.em.length) { sec('Emergency (comm failure)'); ap.em.forEach(r => L.push(r[0] + ': ' + r[1])); }
-  if (ap.nav.length) { sec('Navigation'); ap.nav.forEach(r => L.push(r[0] + ': ' + r[1])); }
+  L.push(localDate());
   sec('Notes');
-  const rs = $('n_rwy'); L.push('Runway: ' + (rs.value ? rs.options[rs.selectedIndex].text : ''));
-  L.push('Winds: ' + f('n_wd') + (wref() === 'T' ? ' true (' + (isFinite(magWind()) ? Math.round(magWind()) : '') + ' magnetic after -' + VAR_E + ')' : ' magnetic') + ' @ ' + f('n_ws')); L.push('Alt. setting: ' + f('n_alt')); L.push('Squawk: ' + f('n_sq')); L.push('ATIS: ' + f('n_atis'));
-  sec('Time keeping'); L.push('HOBBS Start ' + f('h_start') + '  Up ' + f('t_up') + '  Down ' + f('t_down') + '  HOBBS Stop ' + f('h_stop'));
-  L.push('Air time ' + hm(span(val('t_up'), val('t_down'))) + '  Flight time ' + hobbsFlt());
+  const rs = $('n_rwy'); L.push('Runway: ' + D(rs.value ? rs.options[rs.selectedIndex].text : ''));
+  L.push('Winds: ' + ((f('n_wd') || f('n_ws')) ? D(f('n_wd')) + '°' + (wref() === 'T' ? ' true' + (isFinite(magWind()) ? ' (' + String(Math.round(magWind())).padStart(3, '0') + '° magnetic)' : '') : ' magnetic') + ' @ ' + D(f('n_ws')) + ' kt' : '—'));
+  L.push('Alt. setting: ' + g('n_alt')); L.push('Squawk: ' + g('n_sq')); L.push('ATIS: ' + g('n_atis'));
+  sec('Time keeping'); L.push('HOBBS Start: ' + g('h_start') + '   Time Up: ' + g('t_up') + '   Time Down: ' + g('t_down') + '   HOBBS Stop: ' + g('h_stop'));
+  L.push('Air time: ' + D(hm(span(val('t_up'), val('t_down')))) + '   Flight time: ' + D(hobbsFlt()));
   if (f('comments')) { sec('Comments'); L.push(f('comments')); }
   sec('Weight and balance');
   L.push(buildReport().replace(/^WEIGHT & BALANCE.*\r?\n.*\r?\n\r?\n/, '').replace(/\r\n/g, '\n').trim());
-  sec('Weather');
-  [['GFA cloud and weather', 'w_gfa1'], ['GFA turb and icing', 'w_gfa2'], ['TAF', 'w_taf'], ['METAR', 'w_metar']].forEach(r => L.push(r[0] + ': ' + f(r[1])));
-  L.push('Upper winds and temp: 3000 ' + f('w_u3') + ' | 6000 ' + f('w_u6') + ' | 9000 ' + f('w_u9'));
-  sec('NOTAM'); L.push(f('notam'));
+  sec('Weather'); L.push('METAR: ' + g('w_metar'));
   sec('Aircraft');
   if (dateDue()) L.push('*** INFORM STAFF OF SERVICE DATE (next due date is today or earlier) ***');
   if (airShort()) L.push('*** INFORM STAFF OF AIRTIME SHORTAGE (within 2 hr of next due TTSN) ***');
   { const oq = String(val('c_oilq')).trim(); if (oq !== '' && num(oq) < 4.5) L.push('*** INFORM STAFF OF OIL QUANTITY (under 4.5 qt) ***'); }
   { const ff = $('f_fuel'); if (ff && String(ff.value).trim() !== '' && num(ff.value) < 20) L.push('*** INFORM STAFF OF FUEL QUANTITY (under 20 gal) ***'); }
   const ck = k => ($$('[data-k="' + k + '"]')[0] || {}).checked ? '[x] ' : '[ ] ';
-  L.push(ck('c_walk') + 'Walk around complete'); L.push(ck('c_fuel') + 'Fuel on board L ' + f('c_fl') + ' R ' + f('c_fr') + ' ' + $('endur').textContent);
-  L.push(ck('c_oil') + 'Oil quantity ' + f('c_oilq')); L.push(ck('c_jl') + 'Journey log: current TTSN ' + f('c_ttsn') + ', next due TTSN ' + f('c_nttsn') + ', next due date ' + f('c_ndate')); L.push(ck('c_arowjil') + 'AROWJIL checked');
+  L.push(ck('c_walk') + 'Walk around complete');
+  L.push(ck('c_fuel') + 'Fuel on board: L ' + g('c_fl') + ' gal, R ' + g('c_fr') + ' gal' + ($('endur').textContent.trim() ? '  (' + $('endur').textContent.trim() + ')' : ''));
+  L.push(ck('c_oil') + 'Oil quantity: ' + (f('c_oilq') ? f('c_oilq') + ' qt' : '—'));
+  L.push(ck('c_jl') + 'Journey log: current TTSN ' + g('c_ttsn') + ', next due TTSN ' + g('c_nttsn') + ', next due date ' + g('c_ndate'));
+  L.push(ck('c_arowjil') + 'AROWJIL checked');
   sec('Aircraft performance');
-  L.push('Pressure altitude: ' + $('p_pa').textContent + '  Density altitude: ' + $('p_da').textContent + '  OAT: ' + f('p_oat'));
-  L.push('Take-off ground roll: ' + f('p_tor') + '  over 50 ft: ' + f('p_to50')); L.push('Proposed power: ' + f('p_rpm') + ' RPM @ ' + f('p_ft') + ' ft  Proposed KTAS: ' + f('p_ktas'));
-  L.push('Landing roll: ' + f('p_ldr') + '  over 50 ft: ' + f('p_ld50'));
+  const pa = $('p_pa').querySelector('.phint') ? '—' : D($('p_pa').textContent), da = $('p_da').querySelector('.phint') ? '—' : D($('p_da').textContent);
+  L.push('OAT: ' + (f('p_oat') ? f('p_oat') + ' °C' : '—') + '   Pressure altitude: ' + pa + '   Density altitude: ' + da);
+  L.push('Take-off ground roll: ' + g('p_tor') + '   Over 50 ft: ' + g('p_to50'));
+  L.push('Proposed power: ' + ((f('p_rpm') || f('p_ft')) ? D(f('p_rpm')) + ' RPM @ ' + D(f('p_ft')) + ' ft' : '—') + '   Proposed KTAS: ' + g('p_ktas'));
+  L.push('Landing roll: ' + g('p_ldr') + '   Over 50 ft: ' + g('p_ld50'));
   const w = windComp(); if (w) L.push('Wind components: ' + (w.hw >= 0 ? 'headwind ' : 'TAILWIND ') + fmt(Math.abs(w.hw), 0) + ' kt, crosswind ' + fmt(Math.abs(w.xw), 0) + ' kt from the ' + (w.xw >= 0 ? 'right' : 'left'));
   L.push(''); L.push('Planning aid only. Confirm against the aircraft documents, POH/AFM and current official sources.');
   return L.join('\r\n') + '\r\n';
@@ -1412,9 +1498,13 @@ $('emailBtn').addEventListener('click', () => {
   catch (e) { msg.textContent = 'Could not open email here. Copy the text below.'; }
   box.value = text; box.hidden = false;
 });
-$('printBtn').addEventListener('click', () => {
+function doPrint(fold) {
+  document.documentElement.classList.toggle('foldover', fold);
+  $('exportMsg').textContent = fold ? 'Fold over: print double-sided, flip on short edge, then fold on the dashed line with the airport page outside.' : '';
   try { window.print(); } catch (e) { $('exportMsg').textContent = 'Printing is not available here. Open the tool in your browser and print from there.'; }
-});
+}
+$('printBtn').addEventListener('click', () => doPrint(false));
+$('foldBtn').addEventListener('click', () => doPrint(true));
 
 // theme
 (function () {
@@ -1433,27 +1523,12 @@ $('printBtn').addEventListener('click', () => {
 renderAirport(); fillEditor(); buildAircraft(); buildFields(); restoreFields(); update();
 let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { drawChart(); }, 120); });
 </script>
+<div class="foldline" aria-hidden="true"></div>
 <script>
-(function () {
-  var el = document.getElementById('offlineStatus');
-  var CACHE = 'pf-v1', NEED = 6, done = false;
-  function set(cls, txt) { el.className = 'pill ' + cls; el.textContent = txt; }
-  function fail(txt) { if (!done) set('off', txt); }
-  if (!('serviceWorker' in navigator)) { set('off', 'This view cannot save the app. Open the site in Safari and add it from there.'); return; }
-  if (location.protocol !== 'https:' && location.hostname !== 'localhost') { set('off', 'Offline storage needs a secure (https) address.'); return; }
-  function check(tries) {
-    caches.open(CACHE).then(function (c) { return c.keys(); }).then(function (keys) {
-      if (keys.length >= NEED) { done = true; set('on', 'Ready for offline use'); el.hidden = true; var ok = document.getElementById('offlineOk'); if (ok) ok.hidden = false; }
-      else if (tries > 0) { setTimeout(function () { check(tries - 1); }, 1000); }
-      else { fail('Not saved yet (' + keys.length + ' of ' + NEED + ' files). Reopen the app while online.'); }
-    }).catch(function () { fail('Offline storage is blocked on this iPad.'); });
-  }
-  setTimeout(function () { fail('Not saved yet. Keep the connection on and reopen the app.'); }, 12000);
-  navigator.serviceWorker.register('sw.js')
-    .then(function () { return navigator.serviceWorker.ready; })
-    .then(function () { check(8); })
-    .catch(function (err) { fail('Offline storage failed: ' + (err && err.name ? err.name : 'error')); });
-})();
+// offline support: cache this page so it opens without a connection (GitHub Pages / any https host)
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
 </script>
 </body>
 </html>

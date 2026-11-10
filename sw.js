@@ -1,34 +1,22 @@
-// Saves the app so it opens with no connection.
-// When online it always fetches the newest files first; the saved copy is used only when there is no connection.
-const CACHE = 'pf-v1';
-const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
+// Preflight Briefing service worker.
+// Bump VERSION whenever you upload a new index.html so devices pick up the change.
+const VERSION = 'preflight-v1';
+const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
-self.addEventListener('install', function (e) {
-  e.waitUntil(caches.open(CACHE).then(function (c) {
-    return Promise.all(FILES.map(function (f) { return c.add(new Request(f, { cache: 'reload' })); }));
-  }).then(function () { return self.skipWaiting(); }));
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
 });
-
-self.addEventListener('activate', function (e) {
-  e.waitUntil(
-    caches.keys()
-      .then(function (keys) { return Promise.all(keys.filter(function (k) { return k !== CACHE; }).map(function (k) { return caches.delete(k); })); })
-      .then(function () { return self.clients.claim(); })
-  );
+self.addEventListener('activate', e => {
+  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
-
-self.addEventListener('fetch', function (e) {
+self.addEventListener('fetch', e => {
   const req = e.request;
-  if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
-  e.respondWith(
-    new Promise(function (resolve, reject) {
-      const t = setTimeout(reject, 3000);
-      fetch(req, { cache: 'no-cache' }).then(function (res) { clearTimeout(t); resolve(res); }, function (err) { clearTimeout(t); reject(err); });
-    }).then(function (res) {
-      if (res && res.ok) { const copy = res.clone(); caches.open(CACHE).then(function (c) { c.put(req, copy); }); }
-      return res;
-    }).catch(function () {
-      return caches.match(req).then(function (hit) { return hit || caches.match('index.html'); });
-    })
-  );
+  if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return; // weather requests go straight to the network
+  if (req.mode === 'navigate') {
+    // page: try the network first so updates show up, fall back to the cached copy offline
+    e.respondWith(fetch(req).then(r => { const copy = r.clone(); caches.open(VERSION).then(c => c.put('./index.html', copy)); return r; })
+      .catch(() => caches.match('./index.html')));
+    return;
+  }
+  e.respondWith(caches.match(req).then(hit => hit || fetch(req)));
 });
