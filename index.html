@@ -211,7 +211,6 @@
 
   .notes { margin: 18px 0 0; padding: 14px 0 0; border-top: 1px solid var(--rule); display: grid; gap: 8px; color: var(--muted); font-size: 15px; max-width: 70ch; list-style: none; }
   .foot { color: var(--muted); font-size: 14px; max-width: 80ch; margin: 0; }
-.wxbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 0 0 10px; } .wxbar .foot { flex: 1; min-width: 160px; } .wxbar .foot.err { color: var(--crit); }
 @media print { .wxbar { display: none !important; }
   /* page 1 left column: diagram across the top; Procedures, Comm, Emergency, Navigation, Notes down the left; Comments down the right; Time Keeping across the bottom */
   /* booklet order: sheet side 1 = [back cover: Performance | front cover: airport panel], side 2 = [inside left: W&B | inside right: Weather] */
@@ -421,6 +420,20 @@
   .page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
   @media (min-width: 1000px) { .page { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
   .col { display: grid; gap: 14px; min-width: 0; align-content: start; }
+@media screen and (min-width: 700px) {
+  /* Time Keeping as one long bar under Comm/Notes: HOBBS Start | Time Up | Time Down | HOBBS Stop */
+  .col.fillcol .two > div { display: contents; }
+  .col.fillcol .two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-auto-rows: auto; }
+  .col.fillcol .p-comm { grid-column: 1; grid-row: 1; } .col.fillcol .p-em { grid-column: 1; grid-row: 2; } .col.fillcol .p-nav { grid-column: 1; grid-row: 3; align-self: start; }
+  .col.fillcol .p-notes { grid-column: 2; grid-row: 1 / 4; align-self: start; }
+  .col.fillcol .timesec { grid-column: 1 / -1; grid-row: 4; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 1.25fr) minmax(0, 1fr); }
+  .col.fillcol .timesec > h2, .col.fillcol .timesec > .sumline { grid-column: 1 / -1; }
+  .col.fillcol .timesec .tk-hs { grid-column: 1; grid-row: 2; } .col.fillcol .timesec .tk-tu { grid-column: 2; grid-row: 2; }
+  .col.fillcol .timesec .tk-td { grid-column: 3; grid-row: 2; } .col.fillcol .timesec .tk-he { grid-column: 4; grid-row: 2; }
+  .col.fillcol .timesec .kv { grid-template-columns: 1fr; gap: 4px; border-right: 1px solid var(--rule); align-content: start; } .col.fillcol .timesec .tk-he { border-right: 0; }
+  .col.fillcol .timesec .kv label { text-align: left; }
+  .col.fillcol .timesec .pair { flex-wrap: wrap; } .col.fillcol .timesec .pair input { flex: 1 1 72px; min-width: 72px; }
+}
 @media screen { .col.fillcol { display: flex; flex-direction: column; align-self: stretch; } .col.fillcol > .sec[aria-label="Comments"] { flex: 1; display: flex; flex-direction: column; } .col.fillcol > .sec[aria-label="Comments"] .ta.tall { flex: 1; resize: none; } }
   .sec { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; min-width: 0; }
   .bar { margin: 0; padding: 6px 10px; background: var(--muted); color: var(--surface); font-family: var(--f-display); font-weight: 600; font-size: 17px; letter-spacing: .08em; text-transform: uppercase; text-align: center; }
@@ -622,7 +635,6 @@
       <section class="sec" aria-label="Weather">
         <h2 class="bar">Weather</h2>
         <div class="inner">
-          <div class="wxbar"><button type="button" class="now" id="wxBtn">Get METAR &amp; TAF</button><span class="foot" id="wxMsg" role="status"></span></div>
           <label class="lbl" for="w_gfa1">GFA (Cloud &amp; Weather)</label><textarea class="ta" id="w_gfa1" data-k="w_gfa1"></textarea>
           <label class="lbl" for="w_gfa2">GFA (Turb &amp; Icing)</label><textarea class="ta" id="w_gfa2" data-k="w_gfa2"></textarea>
           <label class="lbl" for="w_taf">TAF</label><textarea class="ta" id="w_taf" data-k="w_taf"></textarea>
@@ -1345,31 +1357,6 @@ $('cal').addEventListener('click', e => {
 });
 $('cal').addEventListener('change', e => { const k = e.target.dataset.cal; if (k === 'm') calM = +e.target.value; else if (k === 'y') calY = +e.target.value; else return; renderCal(); });
 document.addEventListener('click', e => { if (!$('cal').hidden && e.composedPath().indexOf($('cal')) < 0 && e.target !== $('c_ndate_v')) closeCal(); });
-
-// ---------- live METAR/TAF from aviationweather.gov (needs internet; blocked inside the claude.ai page) ----------
-async function getWx(kind, id) {
-  const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 10000);
-  try {
-    const r = await fetch('https://aviationweather.gov/api/data/' + kind + '?ids=' + encodeURIComponent(id) + '&format=raw', { signal: ctl.signal, cache: 'no-store' });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    return (await r.text()).trim();
-  } finally { clearTimeout(tm); }
-}
-$('wxBtn').addEventListener('click', async () => {
-  const btn = $('wxBtn'), msg = $('wxMsg'), id = String(curAp().ident || '').trim().toUpperCase();
-  msg.classList.remove('err');
-  if (!/^[A-Z0-9]{4}$/.test(id)) { msg.classList.add('err'); msg.textContent = 'Pick an airport with a 4-letter identifier first.'; return; }
-  if (navigator.onLine === false) { msg.classList.add('err'); msg.textContent = 'No internet connection. Enter the weather by hand.'; return; }
-  btn.disabled = true; msg.textContent = 'Getting weather for ' + id + '…';
-  const [m, t] = await Promise.allSettled([getWx('metar', id), getWx('taf', id)]);
-  btn.disabled = false;
-  const got = [], miss = [];
-  if (m.status === 'fulfilled' && m.value) { const el = $('w_metar'); el.value = m.value.split(/\r?\n/)[0].trim(); el.dispatchEvent(new Event('input', { bubbles: true })); got.push('METAR'); } else miss.push('METAR');
-  if (t.status === 'fulfilled' && t.value) { const el = $('w_taf'); el.value = t.value; el.dispatchEvent(new Event('input', { bubbles: true })); got.push('TAF'); } else miss.push('TAF');
-  const z = new Date(), hhmm = String(z.getUTCHours()).padStart(2, '0') + String(z.getUTCMinutes()).padStart(2, '0') + 'Z';
-  if (!got.length) { msg.classList.add('err'); msg.textContent = 'Could not get weather for ' + id + '. The service may be unreachable from here. Enter it by hand.'; return; }
-  msg.textContent = got.join(' and ') + ' for ' + id + ' retrieved ' + hhmm + ' from aviationweather.gov' + (miss.length ? ' (no ' + miss.join(' or ') + ' found)' : '') + '. Confirm against NAV CANADA before flight.';
-});
 
 // ---------- METAR paste: fill winds, altimeter and temperature ----------
 function parseMetar(txt) {

@@ -20,9 +20,7 @@ After changing `index.html`, edit `VERSION` in `sw.js` (for example `preflight-v
 refresh their offline copy.
 
 ## Things to test
-- **Get METAR & TAF** (Weather): needs internet. Fills METAR and TAF from aviationweather.gov and
-  auto-fills winds, altimeter and OAT. If it says it could not get the weather, the service is
-  blocking requests from your site.
+- **METAR paste** (Weather): pasting a METAR auto-fills winds, altimeter and OAT.
 - **Print** and **Print Fold Over**: Fold Over prints double-sided, flip on short edge, then fold on
   the dashed line with the airport page outside.
 - **Email** opens your mail app with the briefing text; **Export TXT** saves it as a file.

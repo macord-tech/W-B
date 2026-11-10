@@ -1,6 +1,6 @@
 // Preflight Briefing service worker.
 // Bump VERSION whenever you upload a new index.html so devices pick up the change.
-const VERSION = 'preflight-v1';
+const VERSION = 'preflight-v3';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
