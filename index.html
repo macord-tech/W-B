@@ -1526,8 +1526,8 @@ function buildPrintSheets(fold) {
   const air = document.querySelector('#page1 > .col.fillcol'), wb = document.querySelector('#page1 > .col:nth-child(2)'),
         wx = document.querySelector('#page2 > .col:nth-child(1)'), pf = document.querySelector('#page2 > .col:nth-child(2)');
   if (!air || !wb || !wx || !pf) return;
-  // fold over: side 1 = [back cover | front cover], side 2 (inside) turned the other way so it reads right after the duplex flip
-  const sheets = fold ? [[pf, 'c-perf', air, 'c-air', 'rot-r'], [wb, 'c-wb', wx, 'c-wx', 'rot-l']]
+  // fold over: side 1 = [back cover | front cover], side 2 = [inside left | inside right]; both turned the same way (checked on the user's double-sided print)
+  const sheets = fold ? [[pf, 'c-perf', air, 'c-air', 'rot-r'], [wb, 'c-wb', wx, 'c-wx', 'rot-r']]
                       : [[air, 'c-air', wb, 'c-wb', 'rot-r'], [wx, 'c-wx', pf, 'c-perf', 'rot-r']];
   const box = document.createElement('div'); box.id = 'printSheets'; box.setAttribute('aria-hidden', 'true');
   sheets.forEach(([a, ca, b, cb, rot]) => {
