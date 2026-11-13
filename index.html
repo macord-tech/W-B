@@ -528,15 +528,17 @@
     /* only the print sheets built by buildPrintSheets() are printed */
     body > :not(#printSheets) { display: none !important; }
     #printSheets { display: block !important; }
-    .psheet { position: relative; width: 7.4in; height: 9.9in; overflow: hidden; break-after: page; page-break-after: always; break-inside: avoid; }
+    .psheet { position: relative; width: 7.2in; height: 9.3in; margin: 0 auto; overflow: hidden; break-after: page; page-break-after: always; break-inside: avoid; }
+    html, body { height: auto !important; min-height: 0 !important; margin: 0 !important; }
     .psheet:last-child { break-after: auto; page-break-after: auto; }
-    /* one landscape sheet 9.9 x 7.4in (.prot), turned onto the portrait page; its content is laid out at 1300 x 971 px and zoomed to fit */
-    .prot { position: absolute; top: 0; left: 0; width: 9.9in; height: 7.4in; transform-origin: 0 0; }
-    .prot.rot-r { transform: translate(7.4in, 0) rotate(90deg); }
-    .prot.rot-l { transform: translate(0, 9.9in) rotate(-90deg); }
+    /* one landscape sheet 9.3 x 7.2in (.prot), turned onto the portrait page; its content is laid out at 1300 x 1006 px and zoomed to fit.
+       Kept smaller than the page so Safari's own header and footer lines never push it onto an extra page. */
+    .prot { position: absolute; top: 0; left: 0; width: 9.3in; height: 7.2in; transform-origin: 0 0; }
+    .prot.rot-r { transform: translate(7.2in, 0) rotate(90deg); }
+    .prot.rot-l { transform: translate(0, 9.3in) rotate(-90deg); }
     .prot.fold::after { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; border-left: 1px dashed #000; }
-    .pland { zoom: .7311; width: 1300px; height: 971px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 14px; }
-    .pland > .col { height: 971px; min-height: 0; gap: 8px; }
+    .pland { zoom: .6868; width: 1300px; height: 1005px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 14px; }
+    .pland > .col { height: 1005px; min-height: 0; gap: 8px; }
     .pland > .col:not(.fillcol) { display: flex !important; flex-direction: column; }
     .pland > .c-wb > .sec, .pland > .c-perf > .sec { flex: 1; display: flex; flex-direction: column; min-height: 0; }
     .pland > .c-wb > .sec > .inner, .pland > .c-perf > .sec > .inner { flex: 1; display: flex; flex-direction: column; min-height: 0; }
