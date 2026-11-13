@@ -1138,6 +1138,9 @@ const normT = t => { t = String(t || '').trim(); const m = /^(\d{1,2}):?(\d{2})$
 const mins = t => { const m = /^(\d{2}):(\d{2})$/.exec(normT(t)); return m ? (+m[1]) * 60 + (+m[2]) : null; };
 const span = (a, b) => { const x = mins(a), y = mins(b); if (x == null || y == null) return null; let d = y - x; if (d < 0) d += 1440; return d; };
 const hm = d => d == null ? '–' : Math.floor(d / 60) + ':' + String(d % 60).padStart(2, '0');
+// decimal hours by the 6-minute table: 0-2 min .0, 3-8 .1, 9-14 .2 ... 51-56 .9, 57-59 rounds up to the next hour
+const hdec = d => { if (d == null) return '–'; const t = Math.floor(d / 60) * 10 + Math.floor((d % 60 + 3) / 6); return (t / 10).toFixed(1); };
+const hmd = d => d == null ? '–' : hm(d) + ' (' + hdec(d) + ')';
 const val = id => { const el = $(id) || document.querySelector('[data-k="' + id + '"]'); return el ? el.value : ''; };
 function altSetting() { let v = parseFloat(String(val('n_alt')).replace(',', '.')); if (!isFinite(v)) return NaN; if (v > 100) v /= 100; return (v > 25 && v < 32) ? v : NaN; }
 const VAR_E = 16;   // magnetic variation used to convert true winds to magnetic (subtract)
@@ -1286,7 +1289,7 @@ function extras() {
   const ap = curAp(), a = cur();
   syncWref();
   // time
-  const airT = hm(span(val('t_up'), val('t_down'))), fltT = hobbsFlt();
+  const airT = hmd(span(val('t_up'), val('t_down'))), fltT = hobbsFlt();
   $('timeSum').innerHTML = '<span class="ts"><span class="tl">Air time</span><b class="tv">' + (airT === '–' ? '' : airT) + '</b></span><span class="ts"><span class="tl">Flight time</span><b class="tv">' + (fltT === '–' ? '' : fltT) + '</b></span>';
   // PA / DA
   const alt = altSetting(), oat = parseFloat(val('p_oat'));
@@ -1440,7 +1443,7 @@ function buildBrief() {
   L.push('Winds: ' + ((f('n_wd') || f('n_ws')) ? D(f('n_wd')) + '°' + (wref() === 'T' ? ' true' + (isFinite(magWind()) ? ' (' + String(Math.round(magWind())).padStart(3, '0') + '° magnetic)' : '') : ' magnetic') + ' @ ' + D(f('n_ws')) + ' kt' : '—'));
   L.push('Alt. setting: ' + g('n_alt')); L.push('Squawk: ' + g('n_sq')); L.push('ATIS: ' + g('n_atis'));
   sec('Time keeping'); L.push('HOBBS Start: ' + g('h_start') + '   Time Up: ' + g('t_up') + '   Time Down: ' + g('t_down') + '   HOBBS Stop: ' + g('h_stop'));
-  L.push('Air time: ' + D(hm(span(val('t_up'), val('t_down')))) + '   Flight time: ' + D(hobbsFlt()));
+  L.push('Air time: ' + D(hmd(span(val('t_up'), val('t_down')))) + '   Flight time: ' + D(hobbsFlt()));
   if (f('comments')) { sec('Notes'); L.push(f('comments')); }
   sec('Weight and balance');
   L.push(buildReport().replace(/^WEIGHT & BALANCE.*\r?\n.*\r?\n\r?\n/, '').replace(/\r\n/g, '\n').trim());
