@@ -537,7 +537,7 @@
     .prot.rot-r { transform: translate(7.2in, 0) rotate(90deg); }
     .prot.rot-l { transform: translate(0, 9.3in) rotate(-90deg); }
     .prot.fold::after { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; border-left: 1px dashed #000; }
-    .pland { zoom: .6868; width: 1300px; height: 1005px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 14px; }
+    .pland { zoom: .6868; width: 1300px; height: 1005px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 35px; } /* 35px x .6868 zoom = 0.25in clear gutter, 1/8in each side of the fold */
     .pland > .col { height: 1005px; min-height: 0; gap: 8px; }
     .pland > .col:not(.fillcol) { display: flex !important; flex-direction: column; }
     .pland > .c-wb > .sec, .pland > .c-perf > .sec { flex: 1; display: flex; flex-direction: column; min-height: 0; }
