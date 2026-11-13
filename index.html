@@ -476,6 +476,7 @@
   .now { flex: none; min-height: 40px; padding: 0 9px; border: 1px solid var(--accent); border-radius: 4px; background: transparent; color: var(--accent); font: inherit; font-weight: 600; font-size: 14px; cursor: pointer; }
   .sumline { padding: 8px 10px; color: var(--muted); font-size: 15px; }
 .foldline { display: none; }
+#printSheets { display: none; }
 #timeSum .ts { margin-right: 18px; } #timeSum .tl { margin-right: 6px; } @media screen { #timeSum .tv:empty::before { content: '–'; } } .sumline b { color: var(--ink); font-family: var(--f-data); }
   .ta { display: block; width: 100%; height: auto; min-height: 76px; padding: 8px; font-family: var(--f-body); resize: vertical; margin-bottom: 8px; }
   .ta.tall { min-height: 150px; margin: 0; border-radius: 0; border: 0; }
@@ -522,7 +523,23 @@
   .inner .fields { margin-bottom: 8px; } .inner details { margin-bottom: 8px; }
   #hdrSub { }
   @media print {
-    @page { size: 11in 8.5in; margin: .35in; } /* explicit landscape letter: iPad Safari ignores the "landscape" keyword but honours a width x height size */
+    @page { size: 8.5in 11in; margin: .5in; } /* portrait letter: iPad Safari always prints portrait, so each landscape sheet is drawn rotated onto it */
+    /* only the print sheets built by buildPrintSheets() are printed */
+    body > :not(#printSheets) { display: none !important; }
+    #printSheets { display: block !important; }
+    .psheet { position: relative; width: 7.4in; height: 9.9in; overflow: hidden; break-after: page; page-break-after: always; break-inside: avoid; }
+    .psheet:last-child { break-after: auto; page-break-after: auto; }
+    /* one landscape sheet 9.9 x 7.4in (.prot), turned onto the portrait page; its content is laid out at 1300 x 971 px and zoomed to fit */
+    .prot { position: absolute; top: 0; left: 0; width: 9.9in; height: 7.4in; transform-origin: 0 0; }
+    .prot.rot-r { transform: translate(7.4in, 0) rotate(90deg); }
+    .prot.rot-l { transform: translate(0, 9.9in) rotate(-90deg); }
+    .prot.fold::after { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; border-left: 1px dashed #000; }
+    .pland { zoom: .7311; width: 1300px; height: 971px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 14px; }
+    .pland > .col { height: 971px; min-height: 0; gap: 8px; }
+    .pland > .col:not(.fillcol) { display: flex !important; flex-direction: column; }
+    .pland > .c-wb > .sec, .pland > .c-perf > .sec { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+    .pland > .c-wb > .sec > .inner, .pland > .c-perf > .sec > .inner { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+    .pland > .c-wb .diagram, .pland > .c-perf .diagram { flex: 1; min-height: 0; display: flex; }
     :root { font-size: 13px; }
     body { padding: 0 !important; font-size: 13px; }
     .cal { display: none !important; }
@@ -1486,9 +1503,42 @@ $('emailBtn').addEventListener('click', () => {
   catch (e) { msg.textContent = 'Could not open email here. Copy the text below.'; }
   box.value = text; box.hidden = false;
 });
+// ---------- printing: copies of the four columns are laid onto two landscape sheets, each turned onto a portrait page ----------
+let printBuilt = false;
+function cloneCol(el, cls) {
+  const n = el.cloneNode(true); n.classList.add(cls);
+  const src = el.querySelectorAll('input, select, textarea'), dst = n.querySelectorAll('input, select, textarea');
+  src.forEach((e, i) => { const t = dst[i]; if (!t) return;
+    if (e.type === 'checkbox' || e.type === 'radio') t.checked = e.checked; else if (e.tagName === 'SELECT') t.selectedIndex = e.selectedIndex; else t.value = e.value;
+    t.removeAttribute('data-k'); t.removeAttribute('name'); t.tabIndex = -1; });
+  return n;
+}
+function clearPrintSheets() { const o = document.getElementById('printSheets'); if (o) o.remove(); printBuilt = false; }
+function buildPrintSheets(fold) {
+  clearPrintSheets();
+  const air = document.querySelector('#page1 > .col.fillcol'), wb = document.querySelector('#page1 > .col:nth-child(2)'),
+        wx = document.querySelector('#page2 > .col:nth-child(1)'), pf = document.querySelector('#page2 > .col:nth-child(2)');
+  if (!air || !wb || !wx || !pf) return;
+  // fold over: side 1 = [back cover | front cover], side 2 (inside) turned the other way so it reads right after the duplex flip
+  const sheets = fold ? [[pf, 'c-perf', air, 'c-air', 'rot-r'], [wb, 'c-wb', wx, 'c-wx', 'rot-l']]
+                      : [[air, 'c-air', wb, 'c-wb', 'rot-r'], [wx, 'c-wx', pf, 'c-perf', 'rot-r']];
+  const box = document.createElement('div'); box.id = 'printSheets'; box.setAttribute('aria-hidden', 'true');
+  sheets.forEach(([a, ca, b, cb, rot]) => {
+    const ps = document.createElement('div'); ps.className = 'psheet';
+    const pr = document.createElement('div'); pr.className = 'prot ' + rot + (fold ? ' fold' : '');
+    const pl = document.createElement('div'); pl.className = 'pland';
+    pl.append(cloneCol(a, ca), cloneCol(b, cb)); pr.append(pl); ps.append(pr); box.append(ps);
+  });
+  document.body.append(box); printBuilt = true;
+}
+window.addEventListener('beforeprint', () => { if (!printBuilt) buildPrintSheets(document.documentElement.classList.contains('foldover')); });
+window.addEventListener('afterprint', () => { clearPrintSheets(); document.documentElement.classList.remove('foldover'); });
+// safety net if afterprint never fires: tidy up on the next tap once printing is over
+['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, () => { if (printBuilt && Date.now() - (window.__pfPrintAt || 0) > 1500) { clearPrintSheets(); document.documentElement.classList.remove('foldover'); } }, true));
 function doPrint(fold) {
   document.documentElement.classList.toggle('foldover', fold);
-  $('exportMsg').textContent = fold ? 'Fold over: print double-sided, then fold on the dashed line with the airport page outside.' : '';
+  $('exportMsg').textContent = fold ? 'Fold over: print double-sided (default flip), then fold on the dashed line with the airport page outside.' : '';
+  buildPrintSheets(fold); window.__pfPrintAt = Date.now();
   try { window.print(); } catch (e) { $('exportMsg').textContent = 'Printing is not available here. Open the tool in your browser and print from there.'; }
 }
 $('printBtn').addEventListener('click', () => doPrint(false));
