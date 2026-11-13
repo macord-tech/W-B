@@ -531,6 +531,7 @@
     .psheet { position: relative; width: 7.2in; height: 9.3in; margin: .35in auto 0; /* centred on the 10in-tall printable area so the fold line is the true centre of the paper */ overflow: hidden; break-after: page; page-break-after: always; break-inside: avoid; }
     html, body { height: auto !important; min-height: 0 !important; margin: 0 !important; }
     .psheet:last-child { break-after: auto; page-break-after: auto; }
+    .psheet.fold-p1 { margin-top: .225in; } /* fold over, page 1: whole sheet (fold line and gutter) 1/8in to the left when read landscape */
     /* one landscape sheet 9.3 x 7.2in (.prot), turned onto the portrait page; its content is laid out at 1300 x 1006 px and zoomed to fit.
        Kept smaller than the page so Safari's own header and footer lines never push it onto an extra page. */
     .prot { position: absolute; top: 0; left: 0; width: 9.3in; height: 7.2in; transform-origin: 0 0; }
@@ -1534,7 +1535,7 @@ function buildPrintSheets(fold) {
                       : [[air, 'c-air', wb, 'c-wb', 'rot-r'], [wx, 'c-wx', pf, 'c-perf', 'rot-r']];
   const box = document.createElement('div'); box.id = 'printSheets'; box.setAttribute('aria-hidden', 'true');
   sheets.forEach(([a, ca, b, cb, rot]) => {
-    const ps = document.createElement('div'); ps.className = 'psheet';
+    const ps = document.createElement('div'); ps.className = 'psheet' + (fold && !box.children.length ? ' fold-p1' : '');
     const pr = document.createElement('div'); pr.className = 'prot ' + rot + (fold ? ' fold' : '');
     const pl = document.createElement('div'); pl.className = 'pland';
     pl.append(cloneCol(a, ca), cloneCol(b, cb)); pr.append(pl); ps.append(pr); box.append(ps);
