@@ -522,7 +522,7 @@
   .inner .fields { margin-bottom: 8px; } .inner details { margin-bottom: 8px; }
   #hdrSub { }
   @media print {
-    @page { size: letter landscape; margin: .35in; }
+    @page { size: 11in 8.5in; margin: .35in; } /* explicit landscape letter: iPad Safari ignores the "landscape" keyword but honours a width x height size */
     :root { font-size: 13px; }
     body { padding: 0 !important; font-size: 13px; }
     .cal { display: none !important; }
