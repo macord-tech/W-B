@@ -235,6 +235,7 @@
   .col.fillcol .timesec .tk-td { grid-column: 3; grid-row: 2; } .col.fillcol .timesec .tk-he { grid-column: 4; grid-row: 2; }
   .col.fillcol .timesec .kv { border-right: 1px solid var(--rule); } .col.fillcol .timesec .tk-he { border-right: 0; }
   .col.fillcol .dia img { max-height: 1.2in; }
+  .pland .col.fillcol .dia img { max-height: 255px; } /* print sheets: diagram 1in deeper on paper (140px at the .6868 zoom); Notes tile gives up the room */
   .phint { display: none !important; }
   #p_pa, #p_da { display: block; min-height: 28px; } #p_pa:has(.phint), #p_da:has(.phint) { border-bottom: 1px solid #aaa; }
   /* every print column runs to the bottom margin: NOTAM grows to push Aircraft down; the W&B and crosswind charts grow to fill */
@@ -538,6 +539,7 @@
     .prot.rot-r { transform: translate(7.2in, 0) rotate(90deg); }
     .prot.rot-l { transform: translate(0, 9.3in) rotate(-90deg); }
     .prot.fold::after { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; border-left: 1px dashed #000; }
+    .foldlabel { position: absolute; left: calc(50% + 2px); top: 50%; transform: translateY(-50%); writing-mode: vertical-rl; font: 600 7pt/1 var(--f-body); letter-spacing: .12em; color: #000; white-space: nowrap; }
     .pland { zoom: .6868; width: 1300px; height: 1005px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 35px; } /* 35px x .6868 zoom = 0.25in clear gutter, 1/8in each side of the fold */
     .pland > .col { height: 1005px; min-height: 0; gap: 8px; }
     .pland > .col:not(.fillcol) { display: flex !important; flex-direction: column; }
@@ -1536,7 +1538,8 @@ function buildPrintSheets(fold) {
   const box = document.createElement('div'); box.id = 'printSheets'; box.setAttribute('aria-hidden', 'true');
   sheets.forEach(([a, ca, b, cb, rot]) => {
     const ps = document.createElement('div'); ps.className = 'psheet' + (fold && !box.children.length ? ' fold-p1' : '');
-    const pr = document.createElement('div'); pr.className = 'prot ' + rot + (fold ? ' fold' : '');
+    const pr = document.createElement('div'); pr.className = 'prot ' + rot + (fold && !box.children.length ? ' fold' : '');
+    if (fold && !box.children.length) { const fl = document.createElement('div'); fl.className = 'foldlabel'; fl.textContent = 'FOLD OVER HERE'; pr.append(fl); }
     const pl = document.createElement('div'); pl.className = 'pland';
     pl.append(cloneCol(a, ca), cloneCol(b, cb)); pr.append(pl); ps.append(pr); box.append(ps);
   });
