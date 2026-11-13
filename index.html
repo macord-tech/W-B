@@ -525,11 +525,11 @@
   .inner .fields { margin-bottom: 8px; } .inner details { margin-bottom: 8px; }
   #hdrSub { }
   @media print {
-    @page { size: 8.5in 11in; margin: .5in; } /* portrait letter: iPad Safari always prints portrait, so each landscape sheet is drawn rotated onto it */
+    @page { size: 8.5in 11in; margin: .5in .15in; } /* portrait letter: iPad Safari always prints portrait, so each landscape sheet is drawn rotated onto it */
     /* only the print sheets built by buildPrintSheets() are printed */
     body > :not(#printSheets) { display: none !important; }
     #printSheets { display: block !important; }
-    .psheet { position: relative; width: 7.2in; height: 9.3in; margin: .35in auto 0; /* centred on the 10in-tall printable area so the fold line is the true centre of the paper */ overflow: hidden; break-after: page; page-break-after: always; break-inside: avoid; }
+    .psheet { position: relative; width: 7.2in; height: 9.3in; margin: .35in auto 0; /* centred on the 10in-tall printable area so the fold line is the true centre of the paper */ overflow: visible; break-after: page; page-break-after: always; break-inside: avoid; }
     html, body { height: auto !important; min-height: 0 !important; margin: 0 !important; }
     .psheet:last-child { break-after: auto; page-break-after: auto; }
     .psheet.fold-p1 { margin-top: .225in; } /* fold over, page 1: whole sheet (fold line and gutter) 1/8in to the left when read landscape */
@@ -538,7 +538,7 @@
     .prot { position: absolute; top: 0; left: 0; width: 9.3in; height: 7.2in; transform-origin: 0 0; }
     .prot.rot-r { transform: translate(7.2in, 0) rotate(90deg); }
     .prot.rot-l { transform: translate(0, 9.3in) rotate(-90deg); }
-    .prot.fold::after { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; border-left: 1px dashed #000; }
+    .prot.fold::after { content: ""; position: absolute; top: -.5in; bottom: -.5in; left: 50%; border-left: 1px dashed #000; } /* runs out to 0.15in from the paper edges */
     .foldlabel { position: absolute; left: calc(50% + 2px); top: 50%; transform: translateY(-50%); writing-mode: vertical-rl; font: 500 5pt/1 var(--f-body); letter-spacing: .1em; color: #8a8a8a; white-space: nowrap; }
     .pland { zoom: .6868; width: 1300px; height: 1005px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 35px; } /* 35px x .6868 zoom = 0.25in clear gutter, 1/8in each side of the fold */
     .pland > .col { height: 1005px; min-height: 0; gap: 8px; }
