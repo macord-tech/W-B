@@ -214,13 +214,14 @@
   /* page 1 left column: diagram across the top; Procedures, Comm, Emergency, Navigation, Notes down the left; Comments down the right; Time Keeping across the bottom */
   /* booklet order: sheet side 1 = [back cover: Performance | front cover: airport panel], side 2 = [inside left: W&B | inside right: Weather] */
   /* used only by the Print Fold Over button (html.foldover) */
-  html:not(.foldover) #page1 { height: 9.8in; align-items: stretch; } /* 7.7in of paper at the .78 print zoom */
+  html:not(.foldover) #page1 { height: 9.3in; align-items: stretch; } /* 7.25in of paper at the .78 print zoom (fits iPad Safari margins) */
   html.foldover .wrap { display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 12px; row-gap: 0; }
   html.foldover .wrap > .page { display: contents !important; }
   html.foldover #page2 > .col:nth-child(2) { grid-column: 1; grid-row: 1; }
-  html.foldover #page1 > .col.fillcol { grid-column: 2; grid-row: 1; height: 9.8in; }
-  html.foldover #page1 > .col:nth-child(2) { grid-column: 1; grid-row: 2; break-before: page; }
-  html.foldover #page2 > .col:nth-child(1) { grid-column: 2; grid-row: 2; break-before: page; }
+  html.foldover #page1 > .col.fillcol { grid-column: 2; grid-row: 1; height: 9.3in; }
+  /* inside sheet is printed turned 180° so it comes out right way up after the duplex flip */
+  html.foldover #page1 > .col:nth-child(2) { grid-column: 2; grid-row: 2; break-before: page; transform: rotate(180deg); }
+  html.foldover #page2 > .col:nth-child(1) { grid-column: 1; grid-row: 2; break-before: page; transform: rotate(180deg); }
   .col.fillcol { display: grid !important; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto auto auto auto 1fr auto; align-content: stretch; }
   .col.fillcol > .sec[aria-label="Airport"] { grid-column: 1 / -1; grid-row: 1; }
   .col.fillcol > .sec[aria-label="Procedures"] { grid-column: 1; grid-row: 2; }
@@ -233,11 +234,11 @@
   .col.fillcol .timesec .tk-hs { grid-column: 1; grid-row: 2; } .col.fillcol .timesec .tk-tu { grid-column: 2; grid-row: 2; }
   .col.fillcol .timesec .tk-td { grid-column: 3; grid-row: 2; } .col.fillcol .timesec .tk-he { grid-column: 4; grid-row: 2; }
   .col.fillcol .timesec .kv { border-right: 1px solid var(--rule); } .col.fillcol .timesec .tk-he { border-right: 0; }
-  .col.fillcol .dia img { max-height: 1.8in; }
+  .col.fillcol .dia img { max-height: 1.2in; }
   .phint { display: none !important; }
   #p_pa, #p_da { display: block; min-height: 28px; } #p_pa:has(.phint), #p_da:has(.phint) { border-bottom: 1px solid #aaa; }
   /* every print column runs to the bottom margin: NOTAM grows to push Aircraft down; the W&B and crosswind charts grow to fill */
-  #page1 > .col:nth-child(2), #page2 > .col { height: 9.8in; display: flex !important; flex-direction: column; }
+  #page1 > .col:nth-child(2), #page2 > .col { height: 9.3in; display: flex !important; flex-direction: column; }
   .p-notam { flex: 1; display: flex; flex-direction: column; } .p-notam .ta.tall { flex: 1; min-height: 0; resize: none; }
   #page1 > .col:nth-child(2) > .sec, #page2 > .col:nth-child(2) > .sec { flex: 1; display: flex; flex-direction: column; min-height: 0; }
   #page1 > .col:nth-child(2) > .sec > .inner, #page2 > .col:nth-child(2) > .sec > .inner { flex: 1; display: flex; flex-direction: column; min-height: 0; }
@@ -588,7 +589,7 @@
           <section class="sec p-nav"><h2 class="bar">Navigation</h2><table class="rtab"><tbody id="navBody"></tbody></table></section>
         </div>
         <div>
-          <section class="sec p-notes"><h2 class="bar">Notes</h2>
+          <section class="sec p-notes"><h2 class="bar">Flight Data</h2>
             <div class="kv"><label for="n_rwy">Runway</label><select id="n_rwy" data-k="n_rwy"></select></div>
             <div class="kv"><label>Wind ref.</label><span class="seg wref" id="wrefSeg" role="group" aria-label="Wind direction reference"><button type="button" data-ref="M" aria-pressed="true">Magnetic</button><button type="button" data-ref="T" aria-pressed="false">True</button></span><input type="hidden" id="n_wref" data-k="n_wref" value="M"></div>
             <div class="kv"><label for="n_wd">Winds</label><span class="pair"><input id="n_wd" data-k="n_wd" inputmode="numeric"><span>°</span><span>@</span><input id="n_ws" data-k="n_ws" inputmode="numeric"><span>kt</span></span></div>
@@ -606,7 +607,7 @@
           </section>
         </div>
       </div>
-      <section class="sec" aria-label="Comments"><h2 class="bar dark">Comments</h2><textarea class="ta tall" id="comments" data-k="comments" aria-label="Comments"></textarea></section>
+      <section class="sec" aria-label="Comments"><h2 class="bar dark">Notes</h2><textarea class="ta tall" id="comments" data-k="comments" aria-label="Notes"></textarea></section>
     </div>
 
     <div class="col">
@@ -683,7 +684,7 @@
           <p class="lbl" style="margin:0 0 6px">Headwind and crosswind</p>
           <div class="xwread" id="xwRead"></div>
           <div class="diagram"><svg id="xwChart" viewBox="0 0 400 380" role="img" aria-label="Headwind and crosswind component chart"></svg></div>
-          <p class="foot phint">Uses the runway and wind entered under Notes. Runway headings are magnetic. If the wind is set to True, 16° is subtracted to convert it to magnetic.</p>
+          <p class="foot phint">Uses the runway and wind entered under Flight Data. Runway headings are magnetic. If the wind is set to True, 16° is subtracted to convert it to magnetic.</p>
         </div>
       </section>
     </div>
@@ -1148,7 +1149,7 @@ function drawXW(w) {
     s += '<text class="xwlab" x="' + (X(x)) + '" y="' + (Y(0) - 6) + '" text-anchor="middle">XW ' + fmt(Math.abs(w.xw), 0) + '</text>';
     s += '<text class="xwlab' + (bad ? ' out' : '') + '" x="' + (X(0) + 6) + '" y="' + (Y(y) + 15) + '">' + (bad ? 'TW ' : 'HW ') + fmt(Math.abs(w.hw), 0) + '</text>';
   } else {
-    s += '<rect class="xwhint-bg" x="' + (L + 40) + '" y="' + (T + ph * 0.42) + '" width="' + (pw - 80) + '" height="56" rx="6"/><text class="xwhint" x="' + (L + pw / 2) + '" y="' + (T + ph * 0.42 + 24) + '" text-anchor="middle">Select a runway and enter</text><text class="xwhint" x="' + (L + pw / 2) + '" y="' + (T + ph * 0.42 + 44) + '" text-anchor="middle">the wind under Notes to plot it</text>';
+    s += '<rect class="xwhint-bg" x="' + (L + 40) + '" y="' + (T + ph * 0.42) + '" width="' + (pw - 80) + '" height="56" rx="6"/><text class="xwhint" x="' + (L + pw / 2) + '" y="' + (T + ph * 0.42 + 24) + '" text-anchor="middle">Select a runway and enter</text><text class="xwhint" x="' + (L + pw / 2) + '" y="' + (T + ph * 0.42 + 44) + '" text-anchor="middle">the wind under Flight Data to plot it</text>';
   }
   $('xwChart').innerHTML = s;
 }
@@ -1213,9 +1214,9 @@ function perfBil(tab, pa, t) {   // bilinear on PA (0..8000) and temp (0..40); r
 function perfCalc() {
   const a = cur(), D = PERF[a.id]; if (!D) return { err: 'POH charts for ' + a.reg + ' have not been added yet. Enter the distances by hand.' };
   const alt = altSetting(), oat = parseFloat(val('p_oat')), w = windComp(), ap = curAp();
-  if (!isFinite(alt)) return { err: 'Enter the altimeter setting under Notes first.' };
+  if (!isFinite(alt)) return { err: 'Enter the altimeter setting under Flight Data first.' };
   if (!isFinite(oat)) return { err: 'Enter the OAT first.' };
-  if (!w) return { err: 'Select a runway and enter the wind under Notes first (the charts need the headwind).' };
+  if (!w) return { err: 'Select a runway and enter the wind under Flight Data first (the charts need the headwind).' };
   if (D.byDA) return perfDA(D, ap.elev + (29.92 - alt) * 1000, oat, w);
   const notes = [];
   let pa = ap.elev + (29.92 - alt) * 1000;
@@ -1270,10 +1271,10 @@ function extras() {
   const pa = isFinite(alt) ? ap.elev + (29.92 - alt) * 1000 : NaN;
   const da = (isFinite(pa) && isFinite(oat)) ? pa + 120 * (oat - (15 - 1.98 * pa / 1000)) : NaN;
   
-  $('p_da').innerHTML = isFinite(da) ? fmt(Math.round(da), 0) + ' ft' : '<span class="phint">– (needs altimeter in Notes and OAT)</span>';
+  $('p_da').innerHTML = isFinite(da) ? fmt(Math.round(da), 0) + ' ft' : '<span class="phint">– (needs altimeter in Flight Data and OAT)</span>';
   // wind
   const w = windComp();
-  $('xwRead').innerHTML = w ? ('<span>' + (w.hw >= 0 ? 'Headwind' : '<b class="bad">Tailwind</b>') + ' <b>' + fmt(Math.abs(w.hw), 0) + ' kt</b></span><span>Crosswind <b>' + fmt(Math.abs(w.xw), 0) + ' kt</b> from the ' + (w.xw >= 0 ? 'right' : 'left') + '</span>') : '<span class="foot phint">Pick a runway and enter the wind under Notes.</span>';
+  $('xwRead').innerHTML = w ? ('<span>' + (w.hw >= 0 ? 'Headwind' : '<b class="bad">Tailwind</b>') + ' <b>' + fmt(Math.abs(w.hw), 0) + ' kt</b></span><span>Crosswind <b>' + fmt(Math.abs(w.xw), 0) + ' kt</b> from the ' + (w.xw >= 0 ? 'right' : 'left') + '</span>') : '<span class="foot phint">Pick a runway and enter the wind under Flight Data.</span>';
   drawXW(w);
   // conditions from Notes, shown in Performance and under Notes
   const rsel = $('n_rwy'), rtxt = rsel.value ? rsel.options[rsel.selectedIndex].text : '';
@@ -1282,7 +1283,7 @@ function extras() {
   const chip = (k, v) => '<span class="chip"><i>' + k + '</i><b>' + (v ? esc(v) : '–') + '</b></span>';
   $('cond').innerHTML = chip('Runway', rtxt) + chip('Wind', wtxt) + chip('Altimeter', atxt) + (w ? chip(w.hw >= 0 ? 'Headwind' : 'Tailwind', fmt(Math.abs(w.hw), 0) + ' kt') + chip('Crosswind', fmt(Math.abs(w.xw), 0) + ' kt ' + (w.xw >= 0 ? 'R' : 'L')) : '');
   $('noteWind').innerHTML = w ? (w.hw >= 0 ? 'Headwind' : '<b class="bad">Tailwind</b>') + ' <b>' + fmt(Math.abs(w.hw), 0) + '</b> kt · Crosswind <b>' + fmt(Math.abs(w.xw), 0) + '</b> kt ' + (w.xw >= 0 ? 'right' : 'left') + (isFinite(pa) ? ' · PA <b>' + fmt(Math.round(pa), 0) + '</b> ft' : '') : '';
-  $('p_pa').innerHTML = isFinite(pa) ? fmt(Math.round(pa), 0) + ' ft' : '<span class="phint">– (enter altimeter under Notes)</span>';
+  $('p_pa').innerHTML = isFinite(pa) ? fmt(Math.round(pa), 0) + ' ft' : '<span class="phint">– (enter altimeter under Flight Data)</span>';
   // low fuel reminder: total fuel on board under 20 gal
   const ff = $('f_fuel'), low = !!ff && String(ff.value).trim() !== '' && num(ff.value) < 20;
   $$('.fuelwarn').forEach(el => { el.hidden = !low; });
@@ -1412,13 +1413,13 @@ function buildBrief() {
   const sec = t => { L.push(''); L.push(t.toUpperCase()); };
   L.push('PREFLIGHT BRIEFING: ' + a.reg + ' ' + a.type + ' · ' + ap.ident + (ap.name ? ' ' + ap.name : ''));
   L.push(localDate());
-  sec('Notes');
+  sec('Flight data');
   const rs = $('n_rwy'); L.push('Runway: ' + D(rs.value ? rs.options[rs.selectedIndex].text : ''));
   L.push('Winds: ' + ((f('n_wd') || f('n_ws')) ? D(f('n_wd')) + '°' + (wref() === 'T' ? ' true' + (isFinite(magWind()) ? ' (' + String(Math.round(magWind())).padStart(3, '0') + '° magnetic)' : '') : ' magnetic') + ' @ ' + D(f('n_ws')) + ' kt' : '—'));
   L.push('Alt. setting: ' + g('n_alt')); L.push('Squawk: ' + g('n_sq')); L.push('ATIS: ' + g('n_atis'));
   sec('Time keeping'); L.push('HOBBS Start: ' + g('h_start') + '   Time Up: ' + g('t_up') + '   Time Down: ' + g('t_down') + '   HOBBS Stop: ' + g('h_stop'));
   L.push('Air time: ' + D(hm(span(val('t_up'), val('t_down')))) + '   Flight time: ' + D(hobbsFlt()));
-  if (f('comments')) { sec('Comments'); L.push(f('comments')); }
+  if (f('comments')) { sec('Notes'); L.push(f('comments')); }
   sec('Weight and balance');
   L.push(buildReport().replace(/^WEIGHT & BALANCE.*\r?\n.*\r?\n\r?\n/, '').replace(/\r\n/g, '\n').trim());
   sec('Weather'); L.push('METAR: ' + g('w_metar'));
@@ -1487,7 +1488,7 @@ $('emailBtn').addEventListener('click', () => {
 });
 function doPrint(fold) {
   document.documentElement.classList.toggle('foldover', fold);
-  $('exportMsg').textContent = fold ? 'Fold over: print double-sided, flip on short edge, then fold on the dashed line with the airport page outside.' : '';
+  $('exportMsg').textContent = fold ? 'Fold over: print double-sided, then fold on the dashed line with the airport page outside.' : '';
   try { window.print(); } catch (e) { $('exportMsg').textContent = 'Printing is not available here. Open the tool in your browser and print from there.'; }
 }
 $('printBtn').addEventListener('click', () => doPrint(false));
