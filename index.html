@@ -528,7 +528,7 @@
     /* only the print sheets built by buildPrintSheets() are printed */
     body > :not(#printSheets) { display: none !important; }
     #printSheets { display: block !important; }
-    .psheet { position: relative; width: 7.2in; height: 9.3in; margin: 0 auto; overflow: hidden; break-after: page; page-break-after: always; break-inside: avoid; }
+    .psheet { position: relative; width: 7.2in; height: 9.3in; margin: .35in auto 0; /* centred on the 10in-tall printable area so the fold line is the true centre of the paper */ overflow: hidden; break-after: page; page-break-after: always; break-inside: avoid; }
     html, body { height: auto !important; min-height: 0 !important; margin: 0 !important; }
     .psheet:last-child { break-after: auto; page-break-after: auto; }
     /* one landscape sheet 9.3 x 7.2in (.prot), turned onto the portrait page; its content is laid out at 1300 x 1006 px and zoomed to fit.
